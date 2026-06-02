@@ -1,4 +1,8 @@
-using System.Runtime.InteropServices;
+using System.Globalization;
+using System.Text;
+
+using Microsoft.Windows.AppNotifications;
+using Microsoft.Windows.AppNotifications.Builder;
 
 namespace WindowSillAiLimits.Services;
 
@@ -13,19 +17,106 @@ public sealed record UsageAboveExpectedAlert(
     double UsedPercent,
     double ExpectedPercent);
 
+public sealed record UsageAlertNotification(
+    string Title,
+    string Body,
+    string Group,
+    string Tag,
+    DateTimeOffset ExpiresAt,
+    bool ExpiresOnReboot);
+
+public interface IUsageAlertNotificationSender
+{
+    void Show(UsageAlertNotification notification);
+}
+
 public sealed class NativeUsageAlertNotifier : IUsageAlertNotifier
 {
-    private const uint MbOk = 0x00000000;
-    private const uint MbIconWarning = 0x00000030;
-    private const uint MbTopmost = 0x00040000;
+    private const string NotificationTitle = "AI Limits";
+    private const string NotificationGroup = "ai-limits";
+
+    private readonly IUsageAlertNotificationSender _sender;
+    private readonly Func<DateTimeOffset> _clock;
+
+    public NativeUsageAlertNotifier()
+        : this(new WindowsAppNotificationSender(), () => DateTimeOffset.Now)
+    {
+    }
+
+    public NativeUsageAlertNotifier(IUsageAlertNotificationSender sender, Func<DateTimeOffset>? clock = null)
+    {
+        _sender = sender;
+        _clock = clock ?? (() => DateTimeOffset.Now);
+    }
 
     public void NotifyUsageAboveExpected(UsageAboveExpectedAlert alert)
     {
-        var title = "AI Limits";
-        var message = $"{alert.ProviderName} {alert.WindowLabel}: realizado {alert.UsedPercent:0}% passou o previsto {alert.ExpectedPercent:0}%.";
-        _ = Task.Run(() => MessageBoxW(IntPtr.Zero, message, title, MbOk | MbIconWarning | MbTopmost));
+        try
+        {
+            _sender.Show(CreateNotification(alert, _clock()));
+        }
+        catch (Exception ex)
+        {
+            AiLimitsDiagnostics.Error("native usage alert notification failed", ex);
+        }
     }
 
-    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int MessageBoxW(IntPtr hWnd, string text, string caption, uint type);
+    public static UsageAlertNotification CreateNotification(UsageAboveExpectedAlert alert, DateTimeOffset now)
+        => new(
+            NotificationTitle,
+            $"{alert.ProviderName} {alert.WindowLabel}: realizado {alert.UsedPercent.ToString("0", CultureInfo.InvariantCulture)}% passou o previsto {alert.ExpectedPercent.ToString("0", CultureInfo.InvariantCulture)}%.",
+            NotificationGroup,
+            $"{CreateTagPart(alert.ProviderName)}-{CreateTagPart(alert.WindowLabel)}",
+            now.AddHours(6),
+            ExpiresOnReboot: true);
+
+    private static string CreateTagPart(string value)
+    {
+        var builder = new StringBuilder(value.Length);
+        var previousWasSeparator = false;
+
+        foreach (var character in value.Trim().ToLowerInvariant())
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                builder.Append(character);
+                previousWasSeparator = false;
+            }
+            else if (!previousWasSeparator && builder.Length > 0)
+            {
+                builder.Append('-');
+                previousWasSeparator = true;
+            }
+        }
+
+        if (builder.Length > 0 && builder[^1] == '-')
+        {
+            builder.Length--;
+        }
+
+        return builder.Length == 0 ? "alert" : builder.ToString();
+    }
+}
+
+public sealed class WindowsAppNotificationSender : IUsageAlertNotificationSender
+{
+    public void Show(UsageAlertNotification notification)
+    {
+        if (!AppNotificationManager.IsSupported())
+        {
+            throw new InvalidOperationException("Windows app notifications are not supported for the current host.");
+        }
+
+        var appNotification = new AppNotificationBuilder()
+            .AddText(notification.Title)
+            .AddText(notification.Body)
+            .SetGroup(notification.Group)
+            .SetTag(notification.Tag)
+            .BuildNotification();
+
+        appNotification.Expiration = notification.ExpiresAt;
+        appNotification.ExpiresOnReboot = notification.ExpiresOnReboot;
+
+        AppNotificationManager.Default.Show(appNotification);
+    }
 }

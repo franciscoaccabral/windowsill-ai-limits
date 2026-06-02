@@ -67,6 +67,7 @@ var tests = new (string Name, Func<Task> Run)[]
     ("omits expected percentages without timing data", Tests.OmitsExpectedPercentagesWithoutTimingData),
     ("marks above expected collapsed values as danger", Tests.MarksAboveExpectedCollapsedValuesAsDanger),
     ("over expected alerts fire once per crossing", Tests.OverExpectedAlertsFireOncePerCrossing),
+    ("native usage alerts build sanitized Windows notification payloads", Tests.NativeUsageAlertsBuildSanitizedWindowsNotificationPayloads),
     ("formats narrow summary without provider names", Tests.FormatsNarrowSummaryWithoutProviderNames),
     ("formats critical-only summary with hidden window indicator", Tests.FormatsCriticalOnlySummaryWithHiddenWindowIndicator),
     ("classifies usage severity thresholds", Tests.ClassifiesUsageSeverityThresholds),
@@ -421,6 +422,33 @@ internal static class Tests
         AssertEqual(2, notifier.Alerts.Count);
         AssertEqual("Anthropic", notifier.Alerts[0].ProviderName);
         AssertEqual("7d", notifier.Alerts[0].WindowLabel);
+
+        return Task.CompletedTask;
+    }
+
+    public static Task NativeUsageAlertsBuildSanitizedWindowsNotificationPayloads()
+    {
+        var now = new DateTimeOffset(2026, 6, 2, 13, 0, 0, TimeSpan.FromHours(-3));
+        var alert = new UsageAboveExpectedAlert("OpenAI", "5h", 2, 1);
+        var sender = new RecordingUsageAlertNotificationSender();
+        var notifier = new NativeUsageAlertNotifier(sender, () => now);
+
+        notifier.NotifyUsageAboveExpected(alert);
+
+        AssertEqual(1, sender.Notifications.Count);
+        var notification = sender.Notifications[0];
+        AssertEqual("AI Limits", notification.Title);
+        AssertEqual("OpenAI 5h: realizado 2% passou o previsto 1%.", notification.Body);
+        AssertEqual("ai-limits", notification.Group);
+        AssertEqual("openai-5h", notification.Tag);
+        AssertEqual(now.AddHours(6), notification.ExpiresAt);
+        AssertEqual(true, notification.ExpiresOnReboot);
+        AssertFalse(notification.Body.Contains("Authorization", StringComparison.OrdinalIgnoreCase), "Notification body must not include headers.");
+
+        var failingSender = new ThrowingUsageAlertNotificationSender();
+        var failingNotifier = new NativeUsageAlertNotifier(failingSender, () => now);
+        failingNotifier.NotifyUsageAboveExpected(alert);
+        AssertEqual(1, failingSender.CallCount);
 
         return Task.CompletedTask;
     }
@@ -3023,6 +3051,25 @@ internal sealed class RecordingUsageAlertNotifier : IUsageAlertNotifier
 
     public void NotifyUsageAboveExpected(UsageAboveExpectedAlert alert)
         => Alerts.Add(alert);
+}
+
+internal sealed class RecordingUsageAlertNotificationSender : IUsageAlertNotificationSender
+{
+    public List<UsageAlertNotification> Notifications { get; } = [];
+
+    public void Show(UsageAlertNotification notification)
+        => Notifications.Add(notification);
+}
+
+internal sealed class ThrowingUsageAlertNotificationSender : IUsageAlertNotificationSender
+{
+    public int CallCount { get; private set; }
+
+    public void Show(UsageAlertNotification notification)
+    {
+        CallCount++;
+        throw new InvalidOperationException("notification blocked");
+    }
 }
 
 internal sealed class MemoryUsageSnapshotCache(UsageSnapshot? initialSnapshot = null) : IUsageSnapshotCache
