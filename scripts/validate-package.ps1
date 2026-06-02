@@ -80,9 +80,9 @@ function Test-ExtensionArchive {
         Assert-PackageEntry "LICENSE.md" "LICENSE.md"
         Assert-PackageEntry "CHANGELOGS.md" "CHANGELOGS.md"
         Assert-PackageEntry "README.md" "README.md"
-        Assert-PackageEntry "content/screenshots/compact-bar.svg" "compact bar screenshot"
-        Assert-PackageEntry "content/screenshots/popup-and-costs.svg" "popup and costs screenshot"
-        Assert-PackageEntry "content/screenshots/settings.svg" "settings screenshot"
+        Assert-PackageEntry "content/screenshots/compact-bar.png" "compact bar screenshot"
+        Assert-PackageEntry "content/screenshots/popup-and-costs.png" "popup and costs screenshot"
+        Assert-PackageEntry "content/screenshots/settings.png" "settings screenshot"
 
         $absoluteEntry = $entries | Where-Object { $_ -match '^[A-Za-z]:\\|^/' } | Select-Object -First 1
         if ($absoluteEntry) {

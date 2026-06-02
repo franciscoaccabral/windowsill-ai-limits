@@ -9,11 +9,11 @@ It does not store tokens and does not send credentials to third parties.
 
 ## Screenshots
 
-![Compact sill bar showing Codex and Claude usage windows](docs/screenshots/compact-bar.svg)
+![Compact sill bar showing Codex and Claude usage windows](docs/screenshots/compact-bar.png)
 
-![AI Limits popup with 5h, 7d, pacing, reset times, and API cost estimate](docs/screenshots/popup-and-costs.svg)
+![AI Limits popup with 5h, 7d, pacing, reset times, and API cost estimate](docs/screenshots/popup-and-costs.png)
 
-![AI Limits settings page](docs/screenshots/settings.svg)
+![AI Limits settings page](docs/screenshots/settings.png)
 
 ## Features
 

@@ -30,7 +30,7 @@
     <None Include="LICENSE.md" Pack="true" PackagePath="\" />
     <None Include="CHANGELOGS.md" Pack="true" PackagePath="\" />
     <None Include="README.md" Pack="true" PackagePath="\" />
-    <None Include="..\..\docs\screenshots\*.svg" Pack="true" PackagePath="content\screenshots\" />
+    <None Include="..\..\docs\screenshots\*.png" Pack="true" PackagePath="content\screenshots\" />
     <Content
       Update="Assets\*.svg"
       CopyToOutputDirectory="PreserveNewest" />
