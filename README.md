@@ -33,7 +33,20 @@ Interactive mockups are available under [`docs/mockups/`](docs/mockups/).
 - **Claude Code** installed and authenticated. The extension reads the local Claude Code OAuth state.
 - .NET SDK 10 to build from source.
 
-## Install
+## Install WindowSill
+
+For individual users, install WindowSill from the Microsoft Store. The official installation
+guide also supports installing it with WinGet:
+
+```pwsh
+winget install --id 9PG6CJPXTPZ0 --source msstore
+```
+
+After installation, launch WindowSill once from the Start menu and complete any first-run setup.
+For enterprise or managed deployments, use the standalone installer described in the
+[WindowSill installation guide](https://getwindowsill.app/doc/articles/administration-and-setup/installation.html).
+
+## Install AI Limits
 
 1. Download or build `WindowSillAiLimits.<version>.wsext`.
 2. Double-click the `.wsext` file to install it in WindowSill.
