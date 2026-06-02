@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.22621</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Platforms>AnyCPU</Platforms>
+    <EnableMsixTooling>true</EnableMsixTooling>
+
+    <PackageId>WindowSillAiLimits</PackageId>
+    <Title>WindowSill AI Limits</Title>
+    <Description>WindowSill extension that shows local Codex and Claude Code usage limits, reset windows, pacing, and API-equivalent token cost.</Description>
+    <Authors>Francisco Cabral</Authors>
+    <PackageProjectUrl>https://github.com/franciscoaccabral/windowsill-ai-limits</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/franciscoaccabral/windowsill-ai-limits</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>windowsill;extension;dotnet;codex;claude;ai-usage;windows</PackageTags>
+    <Version>0.1.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageOutputPath>..\..\artifacts\</PackageOutputPath>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeWinUiGeneratedResourcesInPackage</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludeWinUiGeneratedContentInPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="LICENSE.md" Pack="true" PackagePath="\" />
+    <None Include="CHANGELOGS.md" Pack="true" PackagePath="\" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\docs\screenshots\*.svg" Pack="true" PackagePath="content\screenshots\" />
+    <Content
+      Update="Assets\*.svg"
+      CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="WindowSill.API" Version="0.9.20" />
+  </ItemGroup>
+  <Target Name="CopyWindowSillExtension" AfterTargets="Pack">
+    <Copy
+      SourceFiles="$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg"
+      DestinationFiles="$(PackageOutputPath)$(PackageId).$(PackageVersion).wsext"
+      Condition="Exists('$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg')" />
+  </Target>
+  <Target Name="IncludeWinUiGeneratedResourcesInPackage">
+    <ItemGroup>
+      <BuildOutputInPackage
+        Include="$(OutputPath)$(AssemblyName).pri"
+        TargetPath="$(AssemblyName).pri"
+        Condition="Exists('$(OutputPath)$(AssemblyName).pri')" />
+      <BuildOutputInPackage
+        Include="$(OutputPath)$(AssemblyName)\Views\AiLimitsPopupContent.xbf"
+        TargetPath="$(AssemblyName)\Views\AiLimitsPopupContent.xbf"
+        Condition="Exists('$(OutputPath)$(AssemblyName)\Views\AiLimitsPopupContent.xbf')" />
+      <BuildOutputInPackage
+        Include="$(IntermediateOutputPath)Views\AiLimitsPopupContent.xbf"
+        TargetPath="$(AssemblyName)\Views\AiLimitsPopupContent.xbf"
+        Condition="Exists('$(IntermediateOutputPath)Views\AiLimitsPopupContent.xbf')" />
+    </ItemGroup>
+  </Target>
+  <Target Name="IncludeWinUiGeneratedContentInPackage" Returns="@(TfmSpecificPackageFile)">
+    <ItemGroup>
+      <TfmSpecificPackageFile
+        Include="$(OutputPath)$(AssemblyName)\Views\AiLimitsPopupContent.xbf"
+        PackagePath="lib\$(TargetFramework)\$(AssemblyName)\Views\"
+        Condition="Exists('$(OutputPath)$(AssemblyName)\Views\AiLimitsPopupContent.xbf')" />
+    </ItemGroup>
+  </Target>
+</Project>

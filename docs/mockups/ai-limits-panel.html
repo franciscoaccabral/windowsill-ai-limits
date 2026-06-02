@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WindowSill AI Limits Mockup</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151718;
+      --surface: #1d2022;
+      --surface-soft: #24282a;
+      --border: #34393c;
+      --text: #f3f5f4;
+      --muted: #a2aaa7;
+      --subtle: #737c78;
+      --codex: #46d3a2;
+      --claude: #f0a64b;
+      --warn: #f4c95d;
+      --danger: #f06b65;
+      --ok: #6fd39b;
+      --stale: #8b9490;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: #0f1112;
+      color: var(--text);
+    }
+
+    .stage {
+      width: min(760px, calc(100vw - 32px));
+      padding: 24px;
+    }
+
+    .sill {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .32);
+      overflow: hidden;
+    }
+
+    .header,
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      border-bottom: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .spark {
+      width: 9px;
+      height: 22px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--codex), var(--claude));
+      flex: none;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .icon-button {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-soft);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .provider {
+      background: var(--bg);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .provider-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .provider-name {
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.2;
+    }
+
+    .plan {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--ok);
+      background: rgba(111, 211, 155, .08);
+      white-space: nowrap;
+    }
+
+    .badge.warn {
+      color: var(--warn);
+      background: rgba(244, 201, 93, .08);
+    }
+
+    .badge.stale {
+      color: var(--stale);
+      background: rgba(139, 148, 144, .08);
+    }
+
+    .rows {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 46px minmax(84px, 1fr) 42px;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .bar {
+      height: 8px;
+      background: #303638;
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03);
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      width: var(--value);
+    }
+
+    .pct {
+      text-align: right;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .reset {
+      grid-column: 2 / 4;
+      color: var(--subtle);
+      font-size: 11px;
+      margin-top: -6px;
+    }
+
+    .codex {
+      --accent: var(--codex);
+    }
+
+    .claude {
+      --accent: var(--claude);
+    }
+
+    .danger .fill {
+      background: var(--danger);
+    }
+
+    .warning .fill {
+      background: var(--warn);
+    }
+
+    .source-note {
+      margin-top: 12px;
+      padding: 8px 9px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      background: var(--surface);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .analysis {
+      margin-top: 12px;
+      display: grid;
+      gap: 5px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #182022;
+      font-size: 12px;
+      line-height: 1.22;
+    }
+
+    .analysis-title {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
+      margin-bottom: 2px;
+    }
+
+    .analysis-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      color: var(--muted);
+      min-width: 0;
+    }
+
+    .analysis-line span:first-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .analysis-value {
+      color: var(--text);
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .analysis-value.good {
+      color: var(--ok);
+    }
+
+    .analysis-value.warn {
+      color: var(--warn);
+    }
+
+    .analysis-value.danger {
+      color: var(--danger);
+    }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action {
+      min-width: 30px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--surface-soft);
+      display: inline-grid;
+      place-items: center;
+      padding: 0 8px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 560px) {
+      .stage {
+        padding: 14px;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: 48px minmax(96px, 1fr) 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="WindowSill AI Limits mockup">
+    <section class="sill">
+      <header class="header">
+        <div class="title">
+          <span class="spark" aria-hidden="true"></span>
+          <span>AI Limits</span>
+        </div>
+        <div class="meta">refreshed 18:22</div>
+        <button class="icon-button" title="Refresh" aria-label="Refresh">↻</button>
+      </header>
+
+      <section class="content">
+        <article class="provider codex">
+          <div class="provider-head">
+            <div>
+              <div class="provider-name">Codex</div>
+              <div class="plan">ChatGPT Plus</div>
+            </div>
+            <span class="badge">OK</span>
+          </div>
+
+          <div class="rows">
+            <div class="row">
+              <div class="label">5h</div>
+              <div class="bar"><div class="fill" style="--value:72%"></div></div>
+              <div class="pct">72%</div>
+              <div class="reset">resets today 21:10</div>
+            </div>
+            <div class="row">
+              <div class="label">7d</div>
+              <div class="bar"><div class="fill" style="--value:41%"></div></div>
+              <div class="pct">41%</div>
+              <div class="reset">resets Tue 09:00</div>
+            </div>
+          </div>
+
+          <div class="analysis">
+            <div class="analysis-title">Codex 7d</div>
+            <div class="analysis-line"><span>Usado</span><strong class="analysis-value">9%</strong></div>
+            <div class="analysis-line"><span>Esperado até agora</span><strong class="analysis-value">14.3% (14.28%/dia)</strong></div>
+            <div class="analysis-line"><span>Diferença</span><strong class="analysis-value good">-5.3 p.p.</strong></div>
+            <div class="analysis-line"><span>Ritmo médio atual</span><strong class="analysis-value">9.0%/dia</strong></div>
+            <div class="analysis-line"><span>Previsto terminar</span><strong class="analysis-value">não esgota antes do reset</strong></div>
+            <div class="analysis-line"><span>Impacto</span><strong class="analysis-value good">reset chega primeiro</strong></div>
+            <div class="analysis-line"><span>Janela 7d decorrida</span><strong class="analysis-value">1.0 de 7 dias</strong></div>
+            <div class="analysis-line"><span>Próximo reset 7d</span><strong class="analysis-value">30/05/2026 17:59:31 -0300</strong></div>
+            <div class="analysis-line"><span>Janela 5h</span><strong class="analysis-value">4% usado; reset 4h 16m</strong></div>
+            <div class="analysis-line"><span>Consultado em</span><strong class="analysis-value">24/05/2026 18:01:03 -0300</strong></div>
+          </div>
+
+          <div class="source-note">Using local Codex app-server. No token is stored.</div>
+        </article>
+
+        <article class="provider claude">
+          <div class="provider-head">
+            <div>
+              <div class="provider-name">Claude Code</div>
+              <div class="plan">Subscription account</div>
+            </div>
+            <span class="badge warn">Warning</span>
+          </div>
+
+          <div class="rows">
+            <div class="row warning">
+              <div class="label">5h</div>
+              <div class="bar"><div class="fill" style="--value:86%"></div></div>
+              <div class="pct">86%</div>
+              <div class="reset">resets today 19:44</div>
+            </div>
+            <div class="row">
+              <div class="label">7d</div>
+              <div class="bar"><div class="fill" style="--value:59%"></div></div>
+              <div class="pct">59%</div>
+              <div class="reset">resets Mon 14:20</div>
+            </div>
+            <div class="row">
+              <div class="label">Sonnet</div>
+              <div class="bar"><div class="fill" style="--value:34%"></div></div>
+              <div class="pct">34%</div>
+              <div class="reset">resets Mon 14:20</div>
+            </div>
+          </div>
+
+          <div class="analysis">
+            <div class="analysis-title">Claude 5h</div>
+            <div class="analysis-line"><span>Usado</span><strong class="analysis-value warn">86%</strong></div>
+            <div class="analysis-line"><span>Esperado até agora</span><strong class="analysis-value">64.0%</strong></div>
+            <div class="analysis-line"><span>Diferença</span><strong class="analysis-value warn">+22.0 p.p.</strong></div>
+            <div class="analysis-line"><span>Ritmo médio atual</span><strong class="analysis-value">30.7%/dia</strong></div>
+            <div class="analysis-line"><span>Previsto terminar</span><strong class="analysis-value warn">25/05/2026 04:58</strong></div>
+            <div class="analysis-line"><span>Impacto</span><strong class="analysis-value warn">9h22 antes do reset</strong></div>
+            <div class="analysis-line"><span>Janela 5h</span><strong class="analysis-value">reset 1h 22m</strong></div>
+            <div class="analysis-line"><span>Consultado em</span><strong class="analysis-value">24/05/2026 18:01:03 -0300</strong></div>
+          </div>
+
+          <div class="source-note">5h is getting high. Keep the weekly window visible for planning.</div>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <span>Data from local tools</span>
+        <div class="footer-actions">
+          <button class="action" title="Refresh" aria-label="Refresh">↻</button>
+          <button class="action" title="Settings" aria-label="Settings">⚙</button>
+        </div>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>

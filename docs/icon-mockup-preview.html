@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>WindowSill AI Limits — pré-visualização de ícones</title>
+<style>
+  body { font-family: Segoe UI, system-ui, sans-serif; margin: 0; padding: 32px; background: #f3f3f3; color: #1a1a1a; }
+  h1 { font-size: 18px; }
+  .row { display: flex; gap: 40px; flex-wrap: wrap; margin: 24px 0; }
+  .panel { padding: 20px 28px; border-radius: 10px; }
+  .light { background: #ffffff; border: 1px solid #e0e0e0; }
+  .dark  { background: #202020; color: #f3f3f3; }
+  .sizes { display: flex; align-items: flex-end; gap: 24px; margin-top: 12px; }
+  .sizes figure { margin: 0; text-align: center; }
+  .sizes img { display: block; }
+  figcaption { font-size: 11px; opacity: .7; margin-top: 6px; }
+  /* simulated WindowSill compact bar */
+  .bar { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px;
+         background: #2b2b2b; color: #eee; font-size: 12px; }
+  .bar img { width: 14px; height: 14px; }
+  .label { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+  <h1>Mockup dos ícones de provedor — Claude e ChatGPT</h1>
+
+  <div class="row">
+    <div class="panel light">
+      <div class="label">Fundo claro</div>
+      <div class="sizes">
+        <figure><img src="../src/WindowSillAiLimits/Assets/anthropic-mark.svg" width="14" height="14"><figcaption>Claude 14px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/anthropic-mark.svg" width="24" height="24"><figcaption>24px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/anthropic-mark.svg" width="48" height="48"><figcaption>48px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/openai-mark.svg" width="14" height="14"><figcaption>ChatGPT 14px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/openai-mark.svg" width="24" height="24"><figcaption>24px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/openai-mark.svg" width="48" height="48"><figcaption>48px</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="panel dark">
+      <div class="label">Fundo escuro</div>
+      <div class="sizes">
+        <figure><img src="../src/WindowSillAiLimits/Assets/anthropic-mark.svg" width="14" height="14"><figcaption>Claude 14px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/anthropic-mark.svg" width="24" height="24"><figcaption>24px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/anthropic-mark.svg" width="48" height="48"><figcaption>48px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/openai-mark.svg" width="14" height="14"><figcaption>ChatGPT 14px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/openai-mark.svg" width="24" height="24"><figcaption>24px</figcaption></figure>
+        <figure><img src="../src/WindowSillAiLimits/Assets/openai-mark.svg" width="48" height="48"><figcaption>48px</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
+  <div class="label">Simulação da barra compacta</div>
+  <div class="row">
+    <span class="bar"><img src="../src/WindowSillAiLimits/Assets/openai-mark.svg"> Codex&nbsp;&nbsp;72%</span>
+    <span class="bar"><img src="../src/WindowSillAiLimits/Assets/anthropic-mark.svg"> Claude&nbsp;&nbsp;41%</span>
+  </div>
+</body>
+</html>

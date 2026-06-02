@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WindowSill AI Limits Collapsed Mockup</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1112;
+      --bar: #181b1c;
+      --bar-2: #202426;
+      --border: #34393c;
+      --text: #f3f5f4;
+      --muted: #9fa8a4;
+      --codex: #46d3a2;
+      --claude: #f0a64b;
+      --warn: #f4c95d;
+      --danger: #f06b65;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .stage {
+      width: min(920px, calc(100vw - 28px));
+      display: grid;
+      gap: 22px;
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 0 0 8px;
+    }
+
+    .shell {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      width: 100%;
+      padding: 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: linear-gradient(180deg, var(--bar-2), var(--bar));
+      box-shadow: 0 14px 34px rgba(0, 0, 0, .32);
+      overflow: hidden;
+    }
+
+    .grab {
+      width: 3px;
+      height: 24px;
+      border-radius: 99px;
+      background: #4a5154;
+      flex: none;
+    }
+
+    .provider {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      padding: 4px 8px 4px 6px;
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, .035);
+      white-space: nowrap;
+    }
+
+    .provider.openai {
+      --accent: var(--codex);
+    }
+
+    .provider.anthropic {
+      --accent: var(--claude);
+    }
+
+    .glyph {
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      flex: none;
+      color: var(--accent);
+      font-size: 15px;
+      line-height: 1;
+      border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+    }
+
+    .name {
+      font-size: 12px;
+      font-weight: 650;
+      color: var(--text);
+    }
+
+    .metric {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 3px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .metric strong {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .metric.warn strong {
+      color: var(--warn);
+    }
+
+    .metric.danger strong {
+      color: var(--danger);
+    }
+
+    .divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      flex: none;
+    }
+
+    .updated {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .narrow {
+      width: 470px;
+    }
+
+    .narrow .name,
+    .narrow .updated {
+      display: none;
+    }
+
+    .tiny {
+      width: 318px;
+    }
+
+    .tiny .name,
+    .tiny .updated,
+    .tiny .metric.secondary {
+      display: none;
+    }
+
+    .tiny .provider {
+      flex: 1 1 0;
+      justify-content: center;
+    }
+
+    @media (max-width: 560px) {
+      .bar {
+        width: 100%;
+      }
+
+      .name,
+      .updated {
+        display: none;
+      }
+
+      .provider {
+        padding-inline: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <section class="shell" aria-label="Wide collapsed WindowSill bar">
+      <p class="caption">Collapsed bar · preferred wide state</p>
+      <div class="bar">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="provider openai">
+          <span class="glyph" aria-label="OpenAI">◎</span>
+          <span class="name">OpenAI</span>
+          <span class="metric danger">5h <strong>100%</strong></span>
+          <span class="metric secondary">7d <strong>59%</strong></span>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="provider anthropic">
+          <span class="glyph" aria-label="Anthropic">◇</span>
+          <span class="name">Anthropic</span>
+          <span class="metric">5h <strong>70%</strong></span>
+          <span class="metric secondary">7d <strong>50%</strong></span>
+        </div>
+        <span class="updated">18:22</span>
+      </div>
+    </section>
+
+    <section class="shell" aria-label="Narrow collapsed WindowSill bar">
+      <p class="caption">Narrow fallback · names removed first</p>
+      <div class="bar narrow">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="provider openai">
+          <span class="glyph" aria-label="OpenAI">◎</span>
+          <span class="name">OpenAI</span>
+          <span class="metric danger">5h <strong>100%</strong></span>
+          <span class="metric secondary">7d <strong>59%</strong></span>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="provider anthropic">
+          <span class="glyph" aria-label="Anthropic">◇</span>
+          <span class="name">Anthropic</span>
+          <span class="metric">5h <strong>70%</strong></span>
+          <span class="metric secondary">7d <strong>50%</strong></span>
+        </div>
+        <span class="updated">18:22</span>
+      </div>
+    </section>
+
+    <section class="shell" aria-label="Very narrow collapsed WindowSill bar">
+      <p class="caption">Very narrow fallback · critical window only</p>
+      <div class="bar tiny">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="provider openai">
+          <span class="glyph" aria-label="OpenAI">◎</span>
+          <span class="name">OpenAI</span>
+          <span class="metric danger">5h <strong>100%</strong></span>
+          <span class="metric secondary">7d <strong>59%</strong></span>
+        </div>
+        <div class="provider anthropic">
+          <span class="glyph" aria-label="Anthropic">◇</span>
+          <span class="name">Anthropic</span>
+          <span class="metric">5h <strong>70%</strong></span>
+          <span class="metric secondary">7d <strong>50%</strong></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+

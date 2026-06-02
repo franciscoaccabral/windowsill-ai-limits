@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WindowSill AI Limits - previsto na barra</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #101314;
+      --bar: #273135;
+      --bar-2: #2d373b;
+      --border: #445055;
+      --text: #ecf3f0;
+      --muted: #a7b0ad;
+      --subtle: #74817d;
+      --openai: #19d4a5;
+      --anthropic: #f08d51;
+      --warning: #f4c95d;
+      --danger: #ef6d6a;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: var(--page);
+      color: var(--text);
+    }
+
+    main {
+      width: min(980px, calc(100vw - 32px));
+      display: grid;
+      gap: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .row {
+      display: grid;
+      gap: 8px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 34px;
+      width: 100%;
+      padding: 4px 8px;
+      border-top: 1px solid rgba(255, 255, 255, .08);
+      border-bottom: 1px solid rgba(0, 0, 0, .35);
+      background: linear-gradient(180deg, var(--bar-2), var(--bar));
+      box-shadow: 0 14px 34px rgba(0, 0, 0, .28);
+      overflow: hidden;
+    }
+
+    .bar.medium {
+      width: 540px;
+    }
+
+    .bar.narrow {
+      width: 390px;
+    }
+
+    .bar.tiny {
+      width: 286px;
+    }
+
+    .grab {
+      width: 2px;
+      height: 21px;
+      flex: none;
+      background: var(--border);
+    }
+
+    .provider {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .provider.openai {
+      --accent: var(--openai);
+    }
+
+    .provider.anthropic {
+      --accent: var(--anthropic);
+    }
+
+    .glyph {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      flex: none;
+      color: var(--accent);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .metric {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .metric strong {
+      color: var(--accent);
+      font-size: 16px;
+      font-weight: 750;
+    }
+
+    .metric .slash,
+    .metric .expected {
+      color: var(--subtle);
+      font-weight: 650;
+    }
+
+    .metric.warn .expected {
+      color: var(--warning);
+    }
+
+    .metric.danger .expected {
+      color: var(--danger);
+    }
+
+    .divider {
+      width: 1px;
+      height: 22px;
+      flex: none;
+      background: var(--border);
+    }
+
+    .setting {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: max-content;
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, .035);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .switch {
+      width: 34px;
+      height: 18px;
+      position: relative;
+      flex: none;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--openai) 42%, #283236);
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+    }
+
+    .medium .metric {
+      font-size: 14px;
+    }
+
+    .medium .metric strong {
+      font-size: 15px;
+    }
+
+    .narrow {
+      gap: 8px;
+    }
+
+    .narrow .metric {
+      font-size: 13px;
+    }
+
+    .narrow .metric strong {
+      font-size: 14px;
+    }
+
+    .narrow .metric.five-hour {
+      display: none;
+    }
+
+    .tiny .metric.five-hour,
+    .tiny .metric.seven-day .slash,
+    .tiny .metric.seven-day .expected {
+      display: none;
+    }
+
+    .tiny {
+      justify-content: flex-start;
+      gap: 9px;
+    }
+
+    .tiny .provider {
+      flex: 1 1 0;
+      justify-content: center;
+      gap: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Mockup: previsto na barra compacta</h1>
+      <p class="note">
+        Configuracao proposta: <strong>Mostrar previsto na barra</strong>. Quando ligada, cada janela aparece como
+        realizado/previsto, por exemplo <strong>7d 11%/15%</strong>. O percentual previsto usa a expectativa da janela
+        no momento atual, nao uma nova fonte de dados.
+      </p>
+    </header>
+
+    <div class="setting" aria-label="Configuracao ligada">
+      <span class="switch" aria-hidden="true"></span>
+      <span>Mostrar previsto na barra</span>
+    </div>
+
+    <section class="row" aria-label="Barra larga com previsto">
+      <div class="label">Largo - mostra 5h e 7d com realizado/previsto</div>
+      <div class="bar">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="provider openai">
+          <span class="glyph" aria-label="OpenAI">◎</span>
+          <span class="metric five-hour">5h <strong>22%</strong><span class="slash">/</span><span class="expected">60%</span></span>
+          <span class="metric seven-day">7d <strong>11%</strong><span class="slash">/</span><span class="expected">15%</span></span>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="provider anthropic">
+          <span class="glyph" aria-label="Anthropic">✳</span>
+          <span class="metric five-hour">5h <strong>0%</strong><span class="slash">/</span><span class="expected">41%</span></span>
+          <span class="metric seven-day">7d <strong>0%</strong><span class="slash">/</span><span class="expected">15%</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="row" aria-label="Barra media com previsto">
+      <div class="label">Medio - preserva a leitura completa sem nomes</div>
+      <div class="bar medium">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="provider openai">
+          <span class="glyph" aria-label="OpenAI">◎</span>
+          <span class="metric five-hour">5h <strong>22%</strong><span class="slash">/</span><span class="expected">60%</span></span>
+          <span class="metric seven-day">7d <strong>11%</strong><span class="slash">/</span><span class="expected">15%</span></span>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="provider anthropic">
+          <span class="glyph" aria-label="Anthropic">✳</span>
+          <span class="metric five-hour">5h <strong>0%</strong><span class="slash">/</span><span class="expected">41%</span></span>
+          <span class="metric seven-day">7d <strong>0%</strong><span class="slash">/</span><span class="expected">15%</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="row" aria-label="Barra estreita com previsto">
+      <div class="label">Estreito - prioriza 7d com realizado/previsto</div>
+      <div class="bar narrow">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="provider openai">
+          <span class="glyph" aria-label="OpenAI">◎</span>
+          <span class="metric five-hour">5h <strong>22%</strong><span class="slash">/</span><span class="expected">60%</span></span>
+          <span class="metric seven-day">7d <strong>11%</strong><span class="slash">/</span><span class="expected">15%</span></span>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="provider anthropic">
+          <span class="glyph" aria-label="Anthropic">✳</span>
+          <span class="metric five-hour">5h <strong>0%</strong><span class="slash">/</span><span class="expected">41%</span></span>
+          <span class="metric seven-day">7d <strong>0%</strong><span class="slash">/</span><span class="expected">15%</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="row" aria-label="Barra minima com previsto desligado visualmente">
+      <div class="label">Minimo - fallback atual quando nao cabe ou configuracao desligada</div>
+      <div class="bar tiny">
+        <div class="grab" aria-hidden="true"></div>
+        <div class="provider openai">
+          <span class="glyph" aria-label="OpenAI">◎</span>
+          <span class="metric five-hour">5h <strong>22%</strong><span class="slash">/</span><span class="expected">60%</span></span>
+          <span class="metric seven-day">7d <strong>11%</strong><span class="slash">/</span><span class="expected">15%</span></span>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="provider anthropic">
+          <span class="glyph" aria-label="Anthropic">✳</span>
+          <span class="metric five-hour">5h <strong>0%</strong><span class="slash">/</span><span class="expected">41%</span></span>
+          <span class="metric seven-day">7d <strong>0%</strong><span class="slash">/</span><span class="expected">15%</span></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

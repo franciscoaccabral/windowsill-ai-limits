@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="901" height="815" viewBox="0 0 901 815" role="img" aria-label="WindowSill AI Limits settings screenshot">
+  <rect width="901" height="815" fill="#242424"/>
+  <style>
+    .txt{font-family:Segoe UI,Arial,sans-serif;fill:#f2f2f2}
+    .field{fill:#333;stroke:#3f3f3f;stroke-width:1}
+    .check{fill:#5f7080}
+  </style>
+  <text x="35" y="34" font-size="29" font-weight="700" class="txt">AI Limits</text>
+  <text x="35" y="83" font-size="21" class="txt">Intervalo de atualizacao</text>
+  <rect x="35" y="94" width="780" height="48" rx="6" class="field"/>
+  <text x="54" y="126" font-size="22" class="txt">5 minutos</text>
+  <text x="785" y="122" font-size="20" class="txt">v</text>
+  <text x="35" y="184" font-size="21" class="txt">Intervalo de atualizacao dos custos</text>
+  <rect x="35" y="195" width="780" height="48" rx="6" class="field"/>
+  <text x="54" y="227" font-size="22" class="txt">4 horas</text>
+  <text x="785" y="223" font-size="20" class="txt">v</text>
+  <text x="35" y="284" font-size="21" class="txt">Caminho do comando Codex</text>
+  <rect x="35" y="295" width="780" height="48" rx="6" class="field"/>
+  <text x="54" y="328" font-size="22" class="txt">codex</text>
+  <text x="35" y="385" font-size="21" class="txt">Caminho do comando Claude</text>
+  <rect x="35" y="396" width="780" height="48" rx="6" class="field"/>
+  <text x="54" y="429" font-size="22" class="txt">claude</text>
+  <g font-size="21" class="txt">
+    <rect x="35" y="471" width="30" height="30" rx="6" class="check"/><path d="M43 486 l7 7 l14 -16" fill="none" stroke="#111" stroke-width="3"/><text x="78" y="493">Mostrar nomes dos provedores na barra</text>
+    <rect x="35" y="537" width="30" height="30" rx="6" class="check"/><path d="M43 552 l7 7 l14 -16" fill="none" stroke="#111" stroke-width="3"/><text x="78" y="559">Mostrar previsto na barra</text>
+    <rect x="35" y="603" width="30" height="30" rx="6" class="check"/><path d="M43 618 l7 7 l14 -16" fill="none" stroke="#111" stroke-width="3"/><text x="78" y="625">Avisar quando realizado passar o previsto</text>
+    <rect x="35" y="669" width="30" height="30" rx="6" class="check"/><path d="M43 684 l7 7 l14 -16" fill="none" stroke="#111" stroke-width="3"/><text x="78" y="691">Mostrar previa ao passar o mouse</text>
+    <rect x="35" y="735" width="30" height="30" rx="6" fill="none" stroke="#aaa" stroke-width="2"/><text x="78" y="757">Usar dados ficticios</text>
+  </g>
+</svg>

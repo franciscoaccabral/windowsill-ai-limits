@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WindowSill AI Limits - API Equivalent Cost Mockup</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151718;
+      --surface: #1d2022;
+      --surface-soft: #24282a;
+      --surface-lift: #20262a;
+      --border: #34393c;
+      --text: #f3f5f4;
+      --muted: #a2aaa7;
+      --subtle: #737c78;
+      --codex: #46d3a2;
+      --claude: #f0a64b;
+      --warn: #f4c95d;
+      --danger: #f06b65;
+      --ok: #6fd39b;
+      --info: #71b7ff;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: #0f1112;
+      color: var(--text);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .stage {
+      width: min(860px, calc(100vw - 28px));
+      padding: 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .collapsed {
+      width: min(620px, 100%);
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #202426, #181b1c);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, .3);
+      overflow: hidden;
+    }
+
+    .grab {
+      width: 3px;
+      height: 24px;
+      border-radius: 99px;
+      background: #4a5154;
+      flex: none;
+    }
+
+    .compact-provider {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      padding: 4px 8px 4px 6px;
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, .035);
+      white-space: nowrap;
+    }
+
+    .compact-provider.codex {
+      --accent: var(--codex);
+    }
+
+    .compact-provider.claude {
+      --accent: var(--claude);
+    }
+
+    .glyph {
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      flex: none;
+      color: var(--accent);
+      font-size: 15px;
+      border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+    }
+
+    .name {
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .metric {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 3px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .metric strong {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .metric.warn strong {
+      color: var(--warn);
+    }
+
+    .updated {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .popup {
+      width: 100%;
+      max-width: 780px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .34);
+      overflow: hidden;
+    }
+
+    .header,
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      border-bottom: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-weight: 650;
+    }
+
+    .spark {
+      width: 9px;
+      height: 22px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--codex), var(--claude));
+      flex: none;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .icon-button,
+    .action {
+      min-width: 30px;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-soft);
+      color: var(--text);
+      display: inline-grid;
+      place-items: center;
+      padding: 0 8px;
+      font-size: 13px;
+    }
+
+    .icon-button {
+      width: 30px;
+      padding: 0;
+      font-size: 15px;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .provider {
+      --accent: var(--codex);
+      background: var(--bg);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .provider.claude {
+      --accent: var(--claude);
+    }
+
+    .provider-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .provider-name {
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.2;
+    }
+
+    .plan {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--ok);
+      background: rgba(111, 211, 155, .08);
+      white-space: nowrap;
+    }
+
+    .badge.warn {
+      color: var(--warn);
+      background: rgba(244, 201, 93, .08);
+    }
+
+    .rows {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 42px minmax(84px, 1fr) 42px;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .bar {
+      height: 8px;
+      background: #303638;
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03);
+    }
+
+    .fill {
+      width: var(--value);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .warning .fill {
+      background: var(--warn);
+    }
+
+    .pct {
+      text-align: right;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .reset {
+      grid-column: 2 / 4;
+      color: var(--subtle);
+      font-size: 11px;
+      margin-top: -6px;
+    }
+
+    .analysis {
+      margin-top: 13px;
+      display: grid;
+      gap: 5px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #182022;
+      font-size: 12px;
+      line-height: 1.22;
+    }
+
+    .analysis-title {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 650;
+      margin-bottom: 2px;
+    }
+
+    .api-cost {
+      margin-top: 10px;
+      border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+      border-radius: 7px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 9%, var(--surface-lift)), #182022);
+      overflow: hidden;
+    }
+
+    .api-cost-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    .api-cost-title {
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .api-cost-subtitle {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cost-total {
+      text-align: right;
+      font-size: 18px;
+      font-weight: 750;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cost-total span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 500;
+      margin-top: 1px;
+    }
+
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .token-cell {
+      min-width: 0;
+      background: rgba(0, 0, 0, .1);
+      padding: 8px 10px;
+    }
+
+    .token-label {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .token-value {
+      margin-top: 2px;
+      font-size: 13px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .model-cost-table {
+      display: grid;
+      font-size: 11px;
+      line-height: 1.25;
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    .model-cost-row {
+      display: grid;
+      grid-template-columns: minmax(84px, 1.2fr) minmax(70px, .9fr) minmax(92px, 1.1fr) 62px;
+      gap: 7px;
+      align-items: center;
+      padding: 7px 10px;
+      border-top: 1px solid rgba(255, 255, 255, .055);
+    }
+
+    .model-cost-row.header {
+      color: var(--muted);
+      background: rgba(255, 255, 255, .025);
+      border-top: 0;
+      font-weight: 650;
+    }
+
+    .model-cost-row.total {
+      background: rgba(255, 255, 255, .04);
+      font-weight: 750;
+    }
+
+    .model-cost-row span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .model-cost-row span:not(:first-child) {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .api-cost-lines {
+      display: grid;
+      gap: 5px;
+      padding: 9px 10px 10px;
+      font-size: 12px;
+    }
+
+    .line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      color: var(--muted);
+      min-width: 0;
+    }
+
+    .line span:first-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .line strong {
+      color: var(--text);
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .line strong.good {
+      color: var(--ok);
+    }
+
+    .line strong.warn {
+      color: var(--warn);
+    }
+
+    .source-note {
+      margin-top: 12px;
+      padding: 8px 9px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      background: var(--surface);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .footnote {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      background: #171a1b;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (max-width: 680px) {
+      .stage {
+        padding: 14px;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .name,
+      .updated {
+        display: none;
+      }
+
+      .collapsed {
+        gap: 7px;
+      }
+
+      .compact-provider {
+        flex: 1 1 0;
+        justify-content: center;
+        padding-inline: 5px;
+      }
+
+      .token-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .model-cost-row {
+        grid-template-columns: minmax(74px, 1fr) 62px 74px 54px;
+        gap: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="WindowSill AI Limits API equivalent cost mockup">
+    <section class="collapsed" aria-label="Collapsed WindowSill bar">
+      <div class="grab" aria-hidden="true"></div>
+      <div class="compact-provider codex">
+        <span class="glyph" aria-label="OpenAI">◎</span>
+        <span class="name">OpenAI</span>
+        <span class="metric warn">5h <strong>72%</strong></span>
+        <span class="metric">7d <strong>41%</strong></span>
+      </div>
+      <div class="compact-provider claude">
+        <span class="glyph" aria-label="Anthropic">◇</span>
+        <span class="name">Anthropic</span>
+        <span class="metric warn">5h <strong>86%</strong></span>
+        <span class="metric">7d <strong>59%</strong></span>
+      </div>
+      <span class="updated">18:22</span>
+    </section>
+
+    <section class="popup">
+      <header class="header">
+        <div class="title">
+          <span class="spark" aria-hidden="true"></span>
+          <span>AI Limits</span>
+        </div>
+        <div class="meta">atualizado 18:22</div>
+        <button class="icon-button" title="Atualizar" aria-label="Atualizar">↻</button>
+      </header>
+
+      <section class="content">
+        <article class="provider codex">
+          <div class="provider-head">
+            <div>
+              <div class="provider-name">Codex</div>
+              <div class="plan">ChatGPT Plus · janela local 5h</div>
+            </div>
+            <span class="badge">OK</span>
+          </div>
+
+          <div class="rows">
+            <div class="row warning">
+              <div class="label">5h</div>
+              <div class="bar"><div class="fill" style="--value:72%"></div></div>
+              <div class="pct">72%</div>
+              <div class="reset">reset hoje 21:10</div>
+            </div>
+            <div class="row">
+              <div class="label">7d</div>
+              <div class="bar"><div class="fill" style="--value:41%"></div></div>
+              <div class="pct">41%</div>
+              <div class="reset">reset ter 09:00</div>
+            </div>
+          </div>
+
+          <section class="analysis">
+            <div class="analysis-title">Codex 7d</div>
+            <div class="line"><span>Usado</span><strong>41%</strong></div>
+            <div class="line"><span>Esperado até agora</span><strong>38% (14%/dia)</strong></div>
+            <div class="line"><span>Diferença</span><strong class="warn">+3 p.p.</strong></div>
+            <div class="line"><span>Ritmo médio atual</span><strong>15,4%/dia</strong></div>
+            <div class="line"><span>Previsto terminar</span><strong>30/05/2026 09:28</strong></div>
+            <div class="line"><span>Impacto</span><strong>8h31 antes do reset</strong></div>
+            <div class="line"><span>Janela 7d decorrida</span><strong>2,7 de 7 dias</strong></div>
+            <div class="line"><span>Próximo reset 7d</span><strong>30/05/2026 17:59</strong></div>
+            <div class="line"><span>Janela 5h</span><strong>72% usado; reset 21:10</strong></div>
+            <div class="line"><span>Consultado em</span><strong>26/05/2026 18:22</strong></div>
+          </section>
+
+          <section class="api-cost" aria-label="Codex API equivalent estimate">
+            <div class="api-cost-head">
+              <div>
+                <div class="api-cost-title">Equivalente API por modelo</div>
+                <div class="api-cost-subtitle">tokens locais observados nesta janela 5h</div>
+              </div>
+              <div class="cost-total">$6.84<span>estimado</span></div>
+            </div>
+            <div class="model-cost-table">
+              <div class="model-cost-row header">
+                <span>Modelo</span>
+                <span>Tokens</span>
+                <span>Tarifa API</span>
+                <span>Custo</span>
+              </div>
+              <div class="model-cost-row">
+                <span>gpt-5.3-codex</span>
+                <span>6.32M</span>
+                <span>in/cache/out</span>
+                <span>$4.90</span>
+              </div>
+              <div class="model-cost-row">
+                <span>gpt-5.3-codex-mini</span>
+                <span>3.10M</span>
+                <span>in/cache/out</span>
+                <span>$1.94</span>
+              </div>
+              <div class="model-cost-row total">
+                <span>Total observado</span>
+                <span>9.42M</span>
+                <span>janela 5h</span>
+                <span>$6.84</span>
+              </div>
+            </div>
+            <div class="api-cost-lines">
+              <div class="line"><span>Detalhe de tokens</span><strong>1.82M input · 7.40M cache · 202K output</strong></div>
+              <div class="line"><span>Cobertura local</span><strong class="good">91% da janela</strong></div>
+              <div class="line"><span>Observacao</span><strong>nao e fatura</strong></div>
+            </div>
+          </section>
+
+          <div class="source-note">Limite vem do Codex app-server. Custo usa apenas tokens observados localmente.</div>
+        </article>
+
+        <article class="provider claude">
+          <div class="provider-head">
+            <div>
+              <div class="provider-name">Claude Code</div>
+              <div class="plan">Subscription account · janela local 5h</div>
+            </div>
+            <span class="badge warn">Warning</span>
+          </div>
+
+          <div class="rows">
+            <div class="row warning">
+              <div class="label">5h</div>
+              <div class="bar"><div class="fill" style="--value:86%"></div></div>
+              <div class="pct">86%</div>
+              <div class="reset">reset hoje 19:44</div>
+            </div>
+            <div class="row">
+              <div class="label">7d</div>
+              <div class="bar"><div class="fill" style="--value:59%"></div></div>
+              <div class="pct">59%</div>
+              <div class="reset">reset seg 14:20</div>
+            </div>
+          </div>
+
+          <section class="analysis">
+            <div class="analysis-title">Claude 7d</div>
+            <div class="line"><span>Usado</span><strong>59%</strong></div>
+            <div class="line"><span>Esperado até agora</span><strong>36,2% (14%/dia)</strong></div>
+            <div class="line"><span>Diferença</span><strong class="warn">+22,8 p.p.</strong></div>
+            <div class="line"><span>Ritmo médio atual</span><strong>23,6%/dia</strong></div>
+            <div class="line"><span>Previsto terminar</span><strong>29/05/2026 08:16</strong></div>
+            <div class="line"><span>Impacto</span><strong>1d12h antes do reset</strong></div>
+            <div class="line"><span>Janela 7d decorrida</span><strong>2,5 de 7 dias</strong></div>
+            <div class="line"><span>Próximo reset 7d</span><strong>30/05/2026 21:00</strong></div>
+            <div class="line"><span>Janela 5h</span><strong>86% usado; reset 19:44</strong></div>
+            <div class="line"><span>Consultado em</span><strong>26/05/2026 18:22</strong></div>
+          </section>
+
+          <section class="api-cost" aria-label="Claude API equivalent estimate">
+            <div class="api-cost-head">
+              <div>
+                <div class="api-cost-title">Equivalente API por modelo</div>
+                <div class="api-cost-subtitle">historico local Claude Code nesta janela 5h</div>
+              </div>
+              <div class="cost-total">$9.21<span>estimado</span></div>
+            </div>
+            <div class="model-cost-table">
+              <div class="model-cost-row header">
+                <span>Modelo</span>
+                <span>Tokens</span>
+                <span>Tarifa API</span>
+                <span>Custo</span>
+              </div>
+              <div class="model-cost-row">
+                <span>Claude Sonnet 4.6</span>
+                <span>19.24M</span>
+                <span>in/cache/out</span>
+                <span>$7.88</span>
+              </div>
+              <div class="model-cost-row">
+                <span>Claude Haiku 4.5</span>
+                <span>1.77M</span>
+                <span>in/cache/out</span>
+                <span>$1.33</span>
+              </div>
+              <div class="model-cost-row total">
+                <span>Total observado</span>
+                <span>21.01M</span>
+                <span>janela 5h</span>
+                <span>$9.21</span>
+              </div>
+            </div>
+            <div class="api-cost-lines">
+              <div class="line"><span>Detalhe de tokens</span><strong>980K input · 19.74M cache · 286K output</strong></div>
+              <div class="line"><span>Cobertura local</span><strong class="warn">este dispositivo</strong></div>
+              <div class="line"><span>Observacao</span><strong>assinatura continua fixa</strong></div>
+            </div>
+          </section>
+
+          <div class="source-note">A estimativa ignora uso em outros dispositivos e pode divergir do painel oficial.</div>
+        </article>
+      </section>
+
+      <div class="footnote">
+        Equivalente API mostra quanto os tokens observados custariam se fossem cobrados por API. Ele nao tenta bater com assinatura, fatura ou creditos reais.
+      </div>
+
+      <footer class="footer">
+        <span>Dados locais · sem armazenar tokens de autenticacao</span>
+        <div class="footer-actions">
+          <button class="action" title="Atualizar" aria-label="Atualizar">↻</button>
+          <button class="action" title="Configuracoes" aria-label="Configuracoes">⚙</button>
+        </div>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
