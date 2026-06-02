@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 using WindowSill.API;
 
@@ -76,6 +77,8 @@ var tests = new (string Name, Func<Task> Run)[]
     ("keeps Claude quota text in narrow trailing edge budget", Tests.KeepsClaudeQuotaTextInNarrowTrailingEdgeBudget),
     ("honors collapsed provider name setting", Tests.HonorsCollapsedProviderNameSetting),
     ("defines expanded panel visual contract labels", Tests.DefinesExpandedPanelVisualContractLabels),
+    ("defines i18n resource contract", Tests.DefinesI18nResourceContract),
+    ("localized text resolves supported language resources", Tests.LocalizedTextResolvesSupportedLanguageResources),
     ("chooses expanded provider columns from available width", Tests.ChoosesExpandedProviderColumnsFromAvailableWidth),
     ("preview flyout shows provider icons and pacing", Tests.PreviewFlyoutShowsProviderIconsAndPacing),
     ("defines popup icon button accessibility name", Tests.DefinesPopupIconButtonAccessibilityName),
@@ -103,6 +106,7 @@ var tests = new (string Name, Func<Task> Run)[]
     ("mock data matches approved compact snapshot", Tests.MockDataMatchesApprovedCompactSnapshot),
     ("AiLimitsSill selects real probes by default", Tests.AiLimitsSillSelectsRealProbesByDefault),
     ("configures package output for local validation", Tests.ConfiguresPackageOutputForLocalValidation),
+    ("popup XAML marks static text with WindowSill localization UIDs", Tests.PopupXamlMarksStaticTextWithWindowSillLocalizationUids),
     ("resolves Windows command shims without shell execution", Tests.ResolvesWindowsCommandShimsWithoutShellExecution),
     ("parses Codex primary and secondary rate limits", Tests.ParsesCodexPrimaryAndSecondaryRateLimits),
     ("parses Codex schema integer reset and duration fields", Tests.ParsesCodexSchemaIntegerResetAndDurationFields),
@@ -576,16 +580,62 @@ internal static class Tests
 
     public static Task DefinesExpandedPanelVisualContractLabels()
     {
-        AssertEqual("Refresh", AiLimitsDisplayText.Refresh);
-        AssertEqual("Settings", AiLimitsDisplayText.Settings);
-        AssertEqual("Dados de ferramentas locais", AiLimitsDisplayText.SourceNote);
-        AssertEqual("Esperado até agora", AiLimitsDisplayText.ExpectedSoFar);
-        AssertEqual("Diferença", AiLimitsDisplayText.Difference);
-        AssertEqual("Ritmo médio atual", AiLimitsDisplayText.CurrentAveragePace);
-        AssertEqual("Previsto terminar", AiLimitsDisplayText.ProjectedExhaustion);
-        AssertEqual("Impacto", AiLimitsDisplayText.ForecastImpact);
-        AssertEqual("Próximo reset 7d", AiLimitsDisplayText.NextWeeklyReset);
-        AssertEqual("Consultado em", AiLimitsDisplayText.QueriedAt);
+        AssertEqual(LocalizedText.Get("Action.Refresh"), AiLimitsDisplayText.Refresh);
+        AssertEqual(LocalizedText.Get("Action.Settings"), AiLimitsDisplayText.Settings);
+        AssertEqual(LocalizedText.Get("Popup.SourceNote"), AiLimitsDisplayText.SourceNote);
+        AssertEqual(LocalizedText.Get("Pacing.ExpectedSoFar"), AiLimitsDisplayText.ExpectedSoFar);
+        AssertEqual(LocalizedText.Get("Pacing.Difference"), AiLimitsDisplayText.Difference);
+        AssertEqual(LocalizedText.Get("Pacing.CurrentAveragePace"), AiLimitsDisplayText.CurrentAveragePace);
+        AssertEqual(LocalizedText.Get("Pacing.ProjectedExhaustion"), AiLimitsDisplayText.ProjectedExhaustion);
+        AssertEqual(LocalizedText.Get("Pacing.ForecastImpact"), AiLimitsDisplayText.ForecastImpact);
+        AssertEqual(LocalizedText.Get("Pacing.NextWeeklyReset"), AiLimitsDisplayText.NextWeeklyReset);
+        AssertEqual(LocalizedText.Get("Pacing.QueriedAt"), AiLimitsDisplayText.QueriedAt);
+
+        return Task.CompletedTask;
+    }
+
+    public static Task DefinesI18nResourceContract()
+    {
+        var repoRoot = RepositoryRoot();
+        var stringsRoot = System.IO.Path.Combine(repoRoot, "src", "WindowSillAiLimits", "Strings");
+        var enPath = System.IO.Path.Combine(stringsRoot, "en-US", "Resources.resw");
+        var ptPath = System.IO.Path.Combine(stringsRoot, "pt-BR", "Resources.resw");
+        var legacyPath = System.IO.Path.Combine(stringsRoot, "en-US", "Misc.resw");
+
+        AssertTrue(File.Exists(enPath), "en-US Resources.resw should be the complete fallback resource file.");
+        AssertTrue(File.Exists(ptPath), "pt-BR Resources.resw should preserve the current Portuguese UI copy.");
+        AssertFalse(File.Exists(legacyPath), "Misc.resw should be replaced by Resources.resw to match the WindowSill localization convention.");
+
+        var enKeys = LoadResourceKeys(enPath);
+        var ptKeys = LoadResourceKeys(ptPath);
+        foreach (var requiredKey in new[]
+        {
+            "DisplayName",
+            "Action.Refresh",
+            "Action.Settings",
+            "Popup.SourceNote",
+            "Pacing.ExpectedSoFar",
+            "Pacing.ForecastImpact",
+            "Settings.RefreshInterval.Label",
+            "Notification.UsageAboveExpected.BodyFormat",
+        })
+        {
+            AssertTrue(enKeys.Contains(requiredKey), $"en-US resources should define {requiredKey}.");
+            AssertTrue(ptKeys.Contains(requiredKey), $"pt-BR resources should define {requiredKey}.");
+        }
+
+        AssertTrue(enKeys.SetEquals(ptKeys), "en-US and pt-BR resource files should expose the same key set.");
+        return Task.CompletedTask;
+    }
+
+    public static Task LocalizedTextResolvesSupportedLanguageResources()
+    {
+        AssertEqual("AI Limits", LocalizedText.Get("DisplayName", "en-US"));
+        AssertEqual("Refresh", LocalizedText.Get("Action.Refresh", "en-US"));
+        AssertEqual("Atualizar", LocalizedText.Get("Action.Refresh", "pt-BR"));
+        AssertEqual("Dados de ferramentas locais", LocalizedText.Get("Popup.SourceNote", "pt-BR"));
+        AssertEqual("Refresh", LocalizedText.Get("Action.Refresh", "fr-FR"));
+        AssertEqual("Missing.Key", LocalizedText.Get("Missing.Key", "pt-BR"));
 
         return Task.CompletedTask;
     }
@@ -726,8 +776,8 @@ internal static class Tests
         var sourcePath = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "WindowSillAiLimits", "Views", "AiLimitsPopupContent.cs"));
         var source = File.ReadAllText(sourcePath);
 
-        AssertTrue(source.Contains("AutomationProperties.SetName(RefreshIconButton, \"Atualizar uso\")", StringComparison.Ordinal), "The icon-only refresh button should define an accessible name.");
-        AssertTrue(source.Contains("ToolTipService.SetToolTip(RefreshIconButton, \"Atualizar uso\")", StringComparison.Ordinal), "The icon-only refresh button should keep a tooltip.");
+        AssertTrue(source.Contains("AutomationProperties.SetName(RefreshIconButton, LocalizedText.Get(\"Action.RefreshUsage\"))", StringComparison.Ordinal), "The icon-only refresh button should define a localized accessible name.");
+        AssertTrue(source.Contains("ToolTipService.SetToolTip(RefreshIconButton, LocalizedText.Get(\"Action.RefreshUsage\"))", StringComparison.Ordinal), "The icon-only refresh button should keep a localized tooltip.");
 
         return Task.CompletedTask;
     }
@@ -770,7 +820,7 @@ internal static class Tests
 
         AssertFalse(source.Contains("stack.Children.Add(BuildApiCostBlock(provider.ApiCostEstimate", StringComparison.Ordinal), "Provider cards should no longer render API cost blocks inline.");
         AssertTrue(source.Contains("BuildApiCostPanel", StringComparison.Ordinal), "The popup should render one consolidated API cost panel below provider cards.");
-        AssertTrue(source.Contains("Custos API", StringComparison.Ordinal), "The consolidated cost panel should use the approved label.");
+        AssertTrue(source.Contains("LocalizedText.Get(\"Popup.ApiCostsTitle\")", StringComparison.Ordinal), "The consolidated cost panel should use a localized label.");
         AssertTrue(source.Contains("ToggleApiCostsCommand", StringComparison.Ordinal), "The consolidated cost panel should be expandable.");
         AssertTrue(source.Contains("CostRefreshCommand", StringComparison.Ordinal), "The consolidated cost panel should expose a cost-only refresh action.");
         AssertTrue(source.LastIndexOf("BuildProviderSection", StringComparison.Ordinal) < source.LastIndexOf("BuildApiCostPanel", StringComparison.Ordinal), "The consolidated cost panel should be declared after provider-card rendering.");
@@ -819,7 +869,7 @@ internal static class Tests
         AssertTrue(tableSource.Contains("TextWrapping = isPrice ? TextWrapping.Wrap", StringComparison.Ordinal), "Valor/token should wrap instead of being truncated.");
         AssertTrue(tableSource.Contains("MaxLines = isPrice ? 2", StringComparison.Ordinal), "Long provider price summaries should be limited to two readable lines.");
         AssertFalse(tableSource.Contains("MaxWidth = alignment == TextAlignment.Left ? 120 : 86", StringComparison.Ordinal), "Cost table cells should not use the old narrow MaxWidth limits.");
-        AssertTrue(source.Contains("ModelCostRow(\"Modelo\", \"Tokens\", \"Valor/token\", \"Custo\"", StringComparison.Ordinal), "The approved cost table headers should remain visible.");
+        AssertTrue(source.Contains("LocalizedText.Get(\"Popup.ModelHeader\")", StringComparison.Ordinal), "The approved cost table headers should resolve from localized resources.");
 
         return Task.CompletedTask;
     }
@@ -1188,6 +1238,18 @@ internal static class Tests
         AssertTrue(project.Contains("IncludeWinUiGeneratedResourcesInPackage", StringComparison.Ordinal), "Package output should include generated WinUI resources needed by the host.");
         AssertTrue(project.Contains("$(AssemblyName).pri", StringComparison.Ordinal), "The WinUI PRI resource index should be packaged.");
         AssertTrue(project.Contains("AiLimitsPopupContent.xbf", StringComparison.Ordinal), "The compiled popup XAML resource should be packaged.");
+        AssertFalse(project.Contains("<EnableDefaultPriItems>false</EnableDefaultPriItems>", StringComparison.Ordinal), "Project should leave default PRI item discovery enabled so localized .resw files are included without duplicate explicit entries.");
+
+        return Task.CompletedTask;
+    }
+
+    public static Task PopupXamlMarksStaticTextWithWindowSillLocalizationUids()
+    {
+        var xamlPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "WindowSillAiLimits", "Views", "AiLimitsPopupContent.xaml"));
+        var xaml = File.ReadAllText(xamlPath);
+
+        AssertTrue(xaml.Contains("api:Uids.Uid=\"/WindowSillAiLimits/Resources/DisplayName\"", StringComparison.Ordinal), "Popup title should use the WindowSill localization UID convention.");
+        AssertTrue(xaml.Contains("api:Uids.Uid=\"/WindowSillAiLimits/Resources/Popup.RefreshButton\"", StringComparison.Ordinal), "Static refresh button properties should use a WindowSill localization UID.");
 
         return Task.CompletedTask;
     }
@@ -2793,6 +2855,16 @@ internal static class Tests
             throw new InvalidOperationException(message);
         }
     }
+
+    private static string RepositoryRoot()
+        => System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
+
+    private static HashSet<string> LoadResourceKeys(string resourcePath)
+        => XDocument.Load(resourcePath)
+            .Descendants("data")
+            .Select(element => element.Attribute("name")?.Value)
+            .OfType<string>()
+            .ToHashSet(StringComparer.Ordinal);
 
     private static int EstimateCompactTextWidth(string text)
     {

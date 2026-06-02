@@ -27,8 +27,6 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
     private const double CostTableTokensColumnWidth = 78;
     private const double CostTableCostColumnWidth = 82;
 
-    private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
-
     private readonly AiLimitsViewModel _viewModel;
     private readonly ISettingsProvider? _settingsProvider;
 
@@ -45,8 +43,8 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         ApplyCompactText(TitleText, PopupTitleFontSize);
         ApplyCompactText(UpdatedText);
         RefreshIconButton.Command = _viewModel.RefreshCommand;
-        ToolTipService.SetToolTip(RefreshIconButton, "Atualizar uso");
-        AutomationProperties.SetName(RefreshIconButton, "Atualizar uso");
+        ToolTipService.SetToolTip(RefreshIconButton, LocalizedText.Get("Action.RefreshUsage"));
+        AutomationProperties.SetName(RefreshIconButton, LocalizedText.Get("Action.RefreshUsage"));
         BuildFooter(FooterGrid);
 
         _viewModel.PropertyChanged += OnViewModelChanged;
@@ -72,14 +70,14 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         ApplyCompactText(source);
         footer.Children.Add(source);
 
-        var refresh = IconButton("\uE72C", "Atualizar uso");
+        var refresh = IconButton("\uE72C", LocalizedText.Get("Action.RefreshUsage"));
         refresh.Command = _viewModel.RefreshCommand;
         Grid.SetColumn(refresh, 1);
         footer.Children.Add(refresh);
 
-        var settings = IconButton("\uE713", "Abrir configura\u00E7\u00F5es do AI Limits");
+        var settings = IconButton("\uE713", LocalizedText.Get("Action.OpenSettings"));
         settings.IsEnabled = _settingsProvider is not null;
-        settings.Click += (_, _) => _settingsProvider?.OpenSettingsPageForSill("AI Limits", "AI Limits");
+        settings.Click += (_, _) => _settingsProvider?.OpenSettingsPageForSill(LocalizedText.Get("DisplayName"), LocalizedText.Get("DisplayName"));
         Grid.SetColumn(settings, 2);
         footer.Children.Add(settings);
     }
@@ -340,29 +338,31 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         ApplyCompactText(title, HeaderFontSize);
         stack.Children.Add(title);
         stack.Children.Add(Detail(AiLimitsDisplayText.Used, $"{pacing.UsedPercent:0.#}%"));
-        stack.Children.Add(Detail(AiLimitsDisplayText.ExpectedSoFar, $"{pacing.ExpectedPercent:0.#}% ({100 / 7:0.##}%/dia)"));
+        stack.Children.Add(Detail(AiLimitsDisplayText.ExpectedSoFar, $"{pacing.ExpectedPercent.ToString("0.#", CultureInfo.CurrentCulture)}% ({(100 / 7d).ToString("0.##", CultureInfo.CurrentCulture)}%/{LocalizedText.Get("Pacing.PerDaySuffix")})"));
         stack.Children.Add(Detail(AiLimitsDisplayText.Difference, $"{pacing.DifferencePercentagePoints:+0.#;-0.#;0} p.p.", pacing.DifferencePercentagePoints <= 0 ? AiLimitsPalette.Codex : AiLimitsPalette.Warning));
-        stack.Children.Add(Detail(AiLimitsDisplayText.CurrentAveragePace, $"{pacing.AverageDailyPacePercent:0.#}%/dia"));
+        stack.Children.Add(Detail(AiLimitsDisplayText.CurrentAveragePace, $"{pacing.AverageDailyPacePercent.ToString("0.#", CultureInfo.CurrentCulture)}%/{LocalizedText.Get("Pacing.PerDaySuffix")}"));
         stack.Children.Add(Detail(AiLimitsDisplayText.ProjectedExhaustion, FormatProjectedExhaustion(pacing)));
         stack.Children.Add(Detail(AiLimitsDisplayText.ForecastImpact, FormatForecastImpact(pacing)));
-        stack.Children.Add(Detail(AiLimitsDisplayText.WeeklyWindowElapsed, $"{pacing.ElapsedDays:0.#} de 7 dias"));
+        stack.Children.Add(Detail(AiLimitsDisplayText.WeeklyWindowElapsed, LocalizedText.Format("Pacing.DaysElapsedFormat", pacing.ElapsedDays.ToString("0.#", CultureInfo.CurrentCulture))));
 
         if (pacing.ResetsAt is not null)
         {
             // Converte para o fuso local, igual as linhas de janela acima (FormatReset).
-            stack.Children.Add(Detail(AiLimitsDisplayText.NextWeeklyReset, $"{pacing.ResetsAt.Value.ToLocalTime():dd/MM/yyyy HH:mm}"));
+            stack.Children.Add(Detail(AiLimitsDisplayText.NextWeeklyReset, pacing.ResetsAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.CurrentCulture)));
         }
 
         if (fiveHour is not null)
         {
-            var reset = fiveHour.ResetsAt is null ? "reset indisponível" : $"reset {fiveHour.ResetsAt.Value.ToLocalTime():HH:mm}";
+            var reset = fiveHour.ResetsAt is null
+                ? LocalizedText.Get("Pacing.ResetUnavailable")
+                : LocalizedText.Format("Pacing.ResetTimeFormat", fiveHour.ResetsAt.Value.ToLocalTime().ToString("HH:mm", CultureInfo.CurrentCulture));
             var used = fiveHour.UsedPercent is null ? "--" : $"{fiveHour.UsedPercent:0.#}%";
-            stack.Children.Add(Detail(AiLimitsDisplayText.FiveHourWindow, $"{used} usado; {reset}"));
+            stack.Children.Add(Detail(AiLimitsDisplayText.FiveHourWindow, LocalizedText.Format("Pacing.UsedResetFormat", used, reset)));
         }
 
         if (queriedAt is not null)
         {
-            stack.Children.Add(Detail(AiLimitsDisplayText.QueriedAt, $"{queriedAt.Value.ToLocalTime():dd/MM/yyyy HH:mm}"));
+            stack.Children.Add(Detail(AiLimitsDisplayText.QueriedAt, queriedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.CurrentCulture)));
         }
 
         return new Border
@@ -429,14 +429,14 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
             ColumnSpacing = 8,
         };
 
-        var toggle = IconButton(_viewModel.IsApiCostsExpanded ? "\uE70D" : "\uE70E", "Expandir ou recolher custos API");
+        var toggle = IconButton(_viewModel.IsApiCostsExpanded ? "\uE70D" : "\uE70E", LocalizedText.Get("Action.ToggleCosts"));
         toggle.Command = _viewModel.ToggleApiCostsCommand;
         header.Children.Add(toggle);
 
         var titleStack = new StackPanel { Spacing = 1 };
         var title = new TextBlock
         {
-            Text = "Custos API",
+            Text = LocalizedText.Get("Popup.ApiCostsTitle"),
             Foreground = AiLimitsPalette.Text,
             FontWeight = FontWeights.SemiBold,
         };
@@ -445,7 +445,7 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
 
         var subtitle = new TextBlock
         {
-            Text = $"janela 7d ativa · {_viewModel.ApiCostLastUpdatedText} · estimativa local, não fatura",
+            Text = LocalizedText.Format("Popup.ApiCostsSubtitleFormat", _viewModel.ApiCostLastUpdatedText),
             Foreground = AiLimitsPalette.MutedText,
         };
         ApplyCompactText(subtitle, CompactSmallFontSize);
@@ -464,7 +464,7 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         Grid.SetColumn(total, 2);
         header.Children.Add(total);
 
-        var refresh = IconButton("\uE72C", "Atualizar custos API");
+        var refresh = IconButton("\uE72C", LocalizedText.Get("Action.RefreshCosts"));
         refresh.Command = _viewModel.CostRefreshCommand;
         Grid.SetColumn(refresh, 3);
         header.Children.Add(refresh);
@@ -501,7 +501,7 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         if (providers.Count == 0)
         {
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.Children.Add(CompactWrappedText("Nenhum provider detectado para estimar custos."));
+            grid.Children.Add(CompactWrappedText(LocalizedText.Get("Popup.NoCostProviders")));
             return grid;
         }
 
@@ -546,7 +546,7 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         };
         ApplyCompactText(title, HeaderFontSize);
         stack.Children.Add(title);
-        stack.Children.Add(CompactWrappedText("Custos indisponíveis para este provider."));
+        stack.Children.Add(CompactWrappedText(LocalizedText.Get("Popup.ProviderCostsUnavailable")));
 
         return new Border
         {
@@ -578,7 +578,7 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         var titleStack = new StackPanel { Spacing = 1 };
         var title = new TextBlock
         {
-            Text = $"{ProviderDisplayTitle(provider)} · {FormatUsd(estimate.TotalCostUsd)} · {FormatCompactTokens(estimate.TotalTokens.TotalTokens)} tokens",
+            Text = $"{ProviderDisplayTitle(provider)} · {FormatUsd(estimate.TotalCostUsd)} · {FormatCompactTokens(estimate.TotalTokens.TotalTokens)} {LocalizedText.Get("ViewModel.TokensSuffix")}",
             Foreground = AiLimitsPalette.Text,
             FontWeight = FontWeights.SemiBold,
         };
@@ -587,7 +587,7 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
 
         var subtitle = new TextBlock
         {
-            Text = $"custo por modelo usado na janela {estimate.WindowLabel}",
+            Text = LocalizedText.Format("Popup.ProviderCostSubtitleFormat", estimate.WindowLabel),
             Foreground = AiLimitsPalette.MutedText,
         };
         ApplyCompactText(subtitle, CompactSmallFontSize);
@@ -607,14 +607,19 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         stack.Children.Add(header);
 
         var table = new StackPanel { Spacing = 0 };
-        table.Children.Add(ModelCostRow("Modelo", "Tokens", "Valor/token", "Custo", isHeader: true));
+        table.Children.Add(ModelCostRow(
+            LocalizedText.Get("Popup.ModelHeader"),
+            LocalizedText.Get("Popup.TokensHeader"),
+            LocalizedText.Get("Popup.PriceHeader"),
+            LocalizedText.Get("Popup.CostHeader"),
+            isHeader: true));
         foreach (var line in estimate.Lines.Take(4))
         {
             table.Children.Add(ModelCostRow(
                 line.DisplayName,
                 FormatCompactTokens(line.Tokens.TotalTokens),
                 line.PriceSummary,
-                line.CostUsd is null ? "sem preço" : FormatUsd(line.CostUsd.Value),
+                line.CostUsd is null ? LocalizedText.Get("Popup.NoPrice") : FormatUsd(line.CostUsd.Value),
                 isHeader: false,
                 valueBrush: line.CostUsd is null ? AiLimitsPalette.MutedText : AiLimitsPalette.Text));
         }
@@ -622,7 +627,7 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         if (estimate.Lines.Count > 4)
         {
             table.Children.Add(ModelCostRow(
-                $"mais {estimate.Lines.Count - 4} modelo(s)",
+                LocalizedText.Format("Popup.MoreModelsFormat", estimate.Lines.Count - 4),
                 FormatCompactTokens(estimate.Lines.Skip(4).Sum(line => line.Tokens.TotalTokens)),
                 "",
                 "",
@@ -631,7 +636,7 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         }
 
         table.Children.Add(ModelCostRow(
-            "Total precificado",
+            LocalizedText.Get("Popup.TotalPriced"),
             FormatCompactTokens(estimate.TotalTokens.TotalTokens),
             estimate.WindowLabel,
             FormatUsd(estimate.TotalCostUsd),
@@ -722,15 +727,15 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
     {
         if (tokens >= 1_000_000)
         {
-            return (tokens / 1_000_000d).ToString("0.#M", PtBr);
+            return (tokens / 1_000_000d).ToString("0.#M", CultureInfo.CurrentCulture);
         }
 
         if (tokens >= 1_000)
         {
-            return (tokens / 1_000d).ToString("0.#K", PtBr);
+            return (tokens / 1_000d).ToString("0.#K", CultureInfo.CurrentCulture);
         }
 
-        return tokens.ToString("0", PtBr);
+        return tokens.ToString("0", CultureInfo.CurrentCulture);
     }
 
     private static string FormatTokenBreakdown(TokenUsageTotals totals)
@@ -758,34 +763,34 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         }
 
         return parts.Count == 0
-            ? "sem tokens precificados"
-            : string.Join(" · ", parts) + " · estimativa local, não fatura";
+            ? LocalizedText.Get("Popup.NoPricedTokens")
+            : string.Join(" · ", parts) + " · " + LocalizedText.Get("Popup.LocalEstimateNotBill");
     }
 
     private static string FormatProjectedExhaustion(UsagePacing pacing)
         => pacing.ProjectedExhaustionStatus switch
         {
-            ProjectedExhaustionStatus.BeforeReset => pacing.ProjectedExhaustionAt!.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm", PtBr),
-            ProjectedExhaustionStatus.AfterReset => "não esgota antes do reset",
-            _ => "sem previsão",
+            ProjectedExhaustionStatus.BeforeReset => pacing.ProjectedExhaustionAt!.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.CurrentCulture),
+            ProjectedExhaustionStatus.AfterReset => LocalizedText.Get("Pacing.DoesNotExhaustBeforeReset"),
+            _ => LocalizedText.Get("Pacing.NoForecast"),
         };
 
     private static string FormatForecastImpact(UsagePacing pacing)
     {
         if (pacing.ProjectedExhaustionStatus == ProjectedExhaustionStatus.AfterReset)
         {
-            return "reset chega primeiro";
+            return LocalizedText.Get("Pacing.ResetComesFirst");
         }
 
         if (pacing.ProjectedExhaustionStatus != ProjectedExhaustionStatus.BeforeReset ||
             pacing.ProjectedExhaustionAt is null ||
             pacing.ResetsAt is null)
         {
-            return "ritmo insuficiente";
+            return LocalizedText.Get("Pacing.InsufficientPace");
         }
 
         var leadTime = pacing.ResetsAt.Value - pacing.ProjectedExhaustionAt.Value;
-        return $"{FormatDuration(leadTime)} antes do reset";
+        return LocalizedText.Format("Pacing.BeforeResetFormat", FormatDuration(leadTime));
     }
 
     private static string FormatDuration(TimeSpan duration)
@@ -802,10 +807,10 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
 
         if (duration.TotalHours >= 1)
         {
-            return $"{(int)duration.TotalHours}h{duration.Minutes:00}";
+            return LocalizedText.Format("Pacing.HoursMinutesFormat", (int)duration.TotalHours, duration.Minutes.ToString("00", CultureInfo.CurrentCulture));
         }
 
-        return $"{Math.Max(1, (int)Math.Round(duration.TotalMinutes))}min";
+        return LocalizedText.Format("Pacing.MinutesFormat", Math.Max(1, (int)Math.Round(duration.TotalMinutes)));
     }
 
     private static Border BuildSourceNote(ProviderUsage provider)
@@ -813,8 +818,8 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         var text = !string.IsNullOrWhiteSpace(provider.Message)
             ? provider.Message
             : provider.Provider == UsageProvider.Codex
-                ? "Usando o Codex app-server local. Nenhum token é armazenado."
-                : "5h e 7d são lidos do estado OAuth local do Claude Code.";
+                ? LocalizedText.Get("Popup.CodexSourceNote")
+                : LocalizedText.Get("Popup.ClaudeSourceNote");
 
         return new Border
         {
@@ -855,20 +860,20 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
     }
 
     private static string ProviderDisplayTitle(ProviderUsage provider)
-        => provider.Provider == UsageProvider.Codex ? "Codex" : "Claude Code";
+        => provider.Provider == UsageProvider.Codex ? LocalizedText.Get("Provider.CodexTitle") : LocalizedText.Get("Provider.ClaudeTitle");
 
     private static string ProviderSubtitle(ProviderUsage provider)
-        => provider.Provider == UsageProvider.Codex ? "Conta ChatGPT" : "Conta de assinatura";
+        => provider.Provider == UsageProvider.Codex ? LocalizedText.Get("Provider.CodexSubtitle") : LocalizedText.Get("Provider.ClaudeSubtitle");
 
     private static string StatusLabel(ProviderStatus status)
         => status switch
         {
-            ProviderStatus.Ok => "OK",
-            ProviderStatus.Warning => "Atenção",
-            ProviderStatus.Unavailable => "Indisponível",
-            ProviderStatus.Stale => "Desatualizado",
-            ProviderStatus.Error => "Erro",
-            ProviderStatus.NotInstalled => "Não instalado",
+            ProviderStatus.Ok => LocalizedText.Get("Status.Ok"),
+            ProviderStatus.Warning => LocalizedText.Get("Status.Warning"),
+            ProviderStatus.Unavailable => LocalizedText.Get("Status.Unavailable"),
+            ProviderStatus.Stale => LocalizedText.Get("Status.Stale"),
+            ProviderStatus.Error => LocalizedText.Get("Status.Error"),
+            ProviderStatus.NotInstalled => LocalizedText.Get("Status.NotInstalled"),
             _ => status.ToString(),
         };
 
@@ -877,8 +882,8 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
         var local = reset.ToLocalTime();
         var today = DateTimeOffset.Now.Date;
         return local.Date == today
-            ? $"reset hoje {local:HH:mm}"
-            : "reset " + local.ToString("ddd HH:mm", PtBr);
+            ? LocalizedText.Format("Pacing.ResetTodayFormat", local.ToString("HH:mm", CultureInfo.CurrentCulture))
+            : LocalizedText.Format("Pacing.ResetDayFormat", local.ToString("ddd HH:mm", CultureInfo.CurrentCulture));
     }
 
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)

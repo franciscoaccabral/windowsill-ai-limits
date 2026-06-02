@@ -63,8 +63,13 @@ public sealed class NativeUsageAlertNotifier : IUsageAlertNotifier
 
     public static UsageAlertNotification CreateNotification(UsageAboveExpectedAlert alert, DateTimeOffset now)
         => new(
-            NotificationTitle,
-            $"{alert.ProviderName} {alert.WindowLabel}: realizado {alert.UsedPercent.ToString("0", CultureInfo.InvariantCulture)}% passou o previsto {alert.ExpectedPercent.ToString("0", CultureInfo.InvariantCulture)}%.",
+            LocalizedText.Get("DisplayName"),
+            LocalizedText.Format(
+                "Notification.UsageAboveExpected.BodyFormat",
+                alert.ProviderName,
+                alert.WindowLabel,
+                alert.UsedPercent.ToString("0", CultureInfo.InvariantCulture),
+                alert.ExpectedPercent.ToString("0", CultureInfo.InvariantCulture)),
             NotificationGroup,
             $"{CreateTagPart(alert.ProviderName)}-{CreateTagPart(alert.WindowLabel)}",
             now.AddHours(6),

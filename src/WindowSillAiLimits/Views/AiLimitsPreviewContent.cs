@@ -34,7 +34,7 @@ public sealed class AiLimitsPreviewContent : Grid
 
         var title = new TextBlock
         {
-            Text = "AI Limits",
+            Text = LocalizedText.Get("DisplayName"),
             Foreground = AiLimitsPalette.Text,
             FontWeight = FontWeights.SemiBold,
         };
@@ -151,7 +151,7 @@ public sealed class AiLimitsPreviewContent : Grid
         var expectedRatio = pacing.ExpectedPercent <= 0
             ? "--"
             : $"{pacing.UsedPercent / pacing.ExpectedPercent * 100:0}%";
-        var direction = differenceIsAbove ? "acima" : "abaixo";
+        var direction = differenceIsAbove ? LocalizedText.Get("Preview.Above") : LocalizedText.Get("Preview.Below");
         var providerLabel = provider == UsageProvider.Codex ? "Codex 7d" : "Claude 7d";
 
         // Empilha em linhas que quebram para nao truncar o pacing no flyout estreito.
@@ -159,7 +159,7 @@ public sealed class AiLimitsPreviewContent : Grid
 
         var label = new TextBlock
         {
-            Text = $"{providerLabel} {AiLimitsDisplayText.ExpectedSoFar}",
+            Text = LocalizedText.Format("Preview.ExpectedFormat", providerLabel, AiLimitsDisplayText.ExpectedSoFar),
             Foreground = AiLimitsPalette.MutedText,
         };
         ApplyCompactText(label, wrap: true);
@@ -167,7 +167,11 @@ public sealed class AiLimitsPreviewContent : Grid
 
         var expected = new TextBlock
         {
-            Text = $"{pacing.UsedPercent:0.#}% de {pacing.ExpectedPercent:0.#}% ({expectedRatio} do previsto)",
+            Text = LocalizedText.Format(
+                "Preview.ExpectedRatioFormat",
+                pacing.UsedPercent.ToString("0.#", CultureInfo.CurrentCulture),
+                pacing.ExpectedPercent.ToString("0.#", CultureInfo.CurrentCulture),
+                expectedRatio),
             Foreground = AiLimitsPalette.Text,
             FontWeight = FontWeights.SemiBold,
         };
@@ -176,7 +180,7 @@ public sealed class AiLimitsPreviewContent : Grid
 
         var difference = new TextBlock
         {
-            Text = $"{Math.Abs(pacing.DifferencePercentagePoints):0.#} p.p. {direction}",
+            Text = LocalizedText.Format("Preview.DifferenceFormat", Math.Abs(pacing.DifferencePercentagePoints).ToString("0.#", CultureInfo.CurrentCulture), direction),
             Foreground = differenceBrush,
             FontWeight = FontWeights.SemiBold,
         };

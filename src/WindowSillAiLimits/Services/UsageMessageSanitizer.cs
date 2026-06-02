@@ -23,7 +23,7 @@ public static class UsageMessageSanitizer
         var firstLine = message.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
         if (string.IsNullOrWhiteSpace(firstLine))
         {
-            return "Usage query failed.";
+            return LocalizedText.Get("Sanitizer.UsageQueryFailed");
         }
 
         var sanitized = BearerTokenPattern.Replace(firstLine, "$1[redacted]");

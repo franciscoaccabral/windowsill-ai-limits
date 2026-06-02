@@ -93,7 +93,9 @@ public sealed class AiLimitsViewModel : INotifyPropertyChanged, IDisposable
         => GetCollapsedSummary(CollapsedSummaryLayout.Narrow);
 
     public string LastUpdatedText
-        => Snapshot.LastUpdated == default ? "sem atualização" : $"atualizado {Snapshot.LastUpdated:HH:mm}";
+        => Snapshot.LastUpdated == default
+            ? LocalizedText.Get("ViewModel.NoUpdate")
+            : LocalizedText.Format("ViewModel.UpdatedFormat", Snapshot.LastUpdated.ToString("HH:mm", CultureInfo.CurrentCulture));
 
     public IReadOnlyList<ProviderUsage> Providers => Snapshot.Providers;
 
@@ -124,7 +126,7 @@ public sealed class AiLimitsViewModel : INotifyPropertyChanged, IDisposable
                 .OfType<ApiCostEstimate>()
                 .Sum(estimate => estimate.TotalTokens.TotalTokens);
 
-            return total == 0 ? "--" : $"{FormatCompactTokens(total)} tokens";
+            return total == 0 ? "--" : $"{FormatCompactTokens(total)} {LocalizedText.Get("ViewModel.TokensSuffix")}";
         }
     }
 
@@ -139,8 +141,8 @@ public sealed class AiLimitsViewModel : INotifyPropertyChanged, IDisposable
                 .FirstOrDefault();
 
             return lastUpdated == default
-                ? "custos sem atualização"
-                : $"custos atualizados {lastUpdated.ToLocalTime():HH:mm}";
+                ? LocalizedText.Get("ViewModel.CostsNoUpdate")
+                : LocalizedText.Format("ViewModel.CostsUpdatedFormat", lastUpdated.ToLocalTime().ToString("HH:mm", CultureInfo.CurrentCulture));
         }
     }
 
@@ -375,14 +377,14 @@ public sealed class AiLimitsViewModel : INotifyPropertyChanged, IDisposable
     {
         if (tokens >= 1_000_000)
         {
-            return (tokens / 1_000_000d).ToString("0.#M", CultureInfo.GetCultureInfo("pt-BR"));
+            return (tokens / 1_000_000d).ToString("0.#M", CultureInfo.CurrentCulture);
         }
 
         if (tokens >= 1_000)
         {
-            return (tokens / 1_000d).ToString("0.#K", CultureInfo.GetCultureInfo("pt-BR"));
+            return (tokens / 1_000d).ToString("0.#K", CultureInfo.CurrentCulture);
         }
 
-        return tokens.ToString("0", CultureInfo.GetCultureInfo("pt-BR"));
+        return tokens.ToString("0", CultureInfo.CurrentCulture);
     }
 }

@@ -2,18 +2,18 @@ namespace WindowSillAiLimits.ViewModels;
 
 public static class AiLimitsDisplayText
 {
-    public const string Refresh = "Refresh";
-    public const string Settings = "Settings";
-    public const string SourceNote = "Dados de ferramentas locais";
-    public const string NoProvidersDetected = "Nenhum provedor de IA detectado";
-    public const string Used = "Usado";
-    public const string ExpectedSoFar = "Esperado até agora";
-    public const string Difference = "Diferença";
-    public const string CurrentAveragePace = "Ritmo médio atual";
-    public const string ProjectedExhaustion = "Previsto terminar";
-    public const string ForecastImpact = "Impacto";
-    public const string WeeklyWindowElapsed = "Janela 7d decorrida";
-    public const string NextWeeklyReset = "Próximo reset 7d";
-    public const string FiveHourWindow = "Janela 5h";
-    public const string QueriedAt = "Consultado em";
+    public static string Refresh => LocalizedText.Get("Action.Refresh");
+    public static string Settings => LocalizedText.Get("Action.Settings");
+    public static string SourceNote => LocalizedText.Get("Popup.SourceNote");
+    public static string NoProvidersDetected => LocalizedText.Get("Popup.NoProvidersDetected");
+    public static string Used => LocalizedText.Get("Pacing.Used");
+    public static string ExpectedSoFar => LocalizedText.Get("Pacing.ExpectedSoFar");
+    public static string Difference => LocalizedText.Get("Pacing.Difference");
+    public static string CurrentAveragePace => LocalizedText.Get("Pacing.CurrentAveragePace");
+    public static string ProjectedExhaustion => LocalizedText.Get("Pacing.ProjectedExhaustion");
+    public static string ForecastImpact => LocalizedText.Get("Pacing.ForecastImpact");
+    public static string WeeklyWindowElapsed => LocalizedText.Get("Pacing.WeeklyWindowElapsed");
+    public static string NextWeeklyReset => LocalizedText.Get("Pacing.NextWeeklyReset");
+    public static string FiveHourWindow => LocalizedText.Get("Pacing.FiveHourWindow");
+    public static string QueriedAt => LocalizedText.Get("Pacing.QueriedAt");
 }

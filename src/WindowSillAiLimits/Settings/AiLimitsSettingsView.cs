@@ -31,11 +31,11 @@ public sealed class AiLimitsSettingsView : Grid
             MaxWidth = 520,
         };
 
-        stack.Children.Add(Header("AI Limits"));
-        stack.Children.Add(Field("Intervalo de atualização", _refreshInterval));
-        stack.Children.Add(Field("Intervalo de atualização dos custos", _costRefreshInterval));
-        stack.Children.Add(Field("Caminho do comando Codex", _codexPath));
-        stack.Children.Add(Field("Caminho do comando Claude", _claudePath));
+        stack.Children.Add(Header(LocalizedText.Get("DisplayName")));
+        stack.Children.Add(Field(LocalizedText.Get("Settings.RefreshInterval.Label"), _refreshInterval));
+        stack.Children.Add(Field(LocalizedText.Get("Settings.CostRefreshInterval.Label"), _costRefreshInterval));
+        stack.Children.Add(Field(LocalizedText.Get("Settings.CodexPath.Label"), _codexPath));
+        stack.Children.Add(Field(LocalizedText.Get("Settings.ClaudePath.Label"), _claudePath));
         stack.Children.Add(_showProviderNames);
         stack.Children.Add(_showExpectedInBar);
         stack.Children.Add(_showOverExpectedAlerts);
@@ -81,19 +81,19 @@ public sealed class AiLimitsSettingsView : Grid
         _codexPath.Text = _settingsProvider.GetSetting(AiLimitsSettings.CodexCommandPath);
         _claudePath.Text = _settingsProvider.GetSetting(AiLimitsSettings.ClaudeCommandPath);
 
-        _showProviderNames.Content = "Mostrar nomes dos provedores na barra";
+        _showProviderNames.Content = LocalizedText.Get("Settings.ShowProviderNames");
         _showProviderNames.IsChecked = _settingsProvider.GetSetting(AiLimitsSettings.ShowProviderNamesInBar);
 
-        _showExpectedInBar.Content = "Mostrar previsto na barra";
+        _showExpectedInBar.Content = LocalizedText.Get("Settings.ShowExpectedInBar");
         _showExpectedInBar.IsChecked = _settingsProvider.GetSetting(AiLimitsSettings.ShowExpectedInBar);
 
-        _showOverExpectedAlerts.Content = "Avisar quando realizado passar o previsto";
+        _showOverExpectedAlerts.Content = LocalizedText.Get("Settings.ShowOverExpectedAlerts");
         _showOverExpectedAlerts.IsChecked = _settingsProvider.GetSetting(AiLimitsSettings.ShowOverExpectedAlerts);
 
-        _showPreviewFlyout.Content = "Mostrar prévia ao passar o mouse";
+        _showPreviewFlyout.Content = LocalizedText.Get("Settings.ShowPreviewFlyout");
         _showPreviewFlyout.IsChecked = _settingsProvider.GetSetting(AiLimitsSettings.ShowPreviewFlyout);
 
-        _useMockData.Content = "Usar dados fictícios";
+        _useMockData.Content = LocalizedText.Get("Settings.UseMockData");
         _useMockData.IsChecked = _settingsProvider.GetSetting(AiLimitsSettings.UseMockData);
     }
 
@@ -169,12 +169,12 @@ public sealed class AiLimitsSettingsView : Grid
         {
             var hours = seconds / 3600;
             return hours == 1
-                ? "1 hora"
-                : string.Create(CultureInfo.InvariantCulture, $"{hours} horas");
+                ? LocalizedText.Get("Settings.OneHour")
+                : LocalizedText.Format("Settings.HoursFormat", hours);
         }
 
         var minutes = seconds / 60;
-        return string.Create(CultureInfo.InvariantCulture, $"{minutes} minutos");
+        return LocalizedText.Format("Settings.MinutesFormat", minutes);
     }
 
     private static TextBlock Header(string text)

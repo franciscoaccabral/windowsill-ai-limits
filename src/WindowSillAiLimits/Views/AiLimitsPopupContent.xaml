@@ -38,6 +38,7 @@
                         </Border>
                         <TextBlock
                             x:Name="TitleText"
+                            api:Uids.Uid="/WindowSillAiLimits/Resources/DisplayName"
                             VerticalAlignment="Center"
                             FontWeight="SemiBold"
                             Text="AI Limits" />
@@ -51,6 +52,7 @@
 
                     <Button
                         x:Name="RefreshIconButton"
+                        api:Uids.Uid="/WindowSillAiLimits/Resources/Popup.RefreshButton"
                         Grid.Column="2"
                         Padding="8,4,8,4"
                         VerticalAlignment="Center">

@@ -73,13 +73,13 @@ public sealed class AiLimitsSill : ISillActivatedByDefault, ISillSingleView, IDi
         _settingsProvider.SettingChanged += OnSettingChanged;
     }
 
-    public string DisplayName => "AI Limits";
+    public string DisplayName => LocalizedText.Get("DisplayName");
 
     public SillView View => _view;
 
     public SillSettingsView[]? SettingsViews =>
     [
-        new("AI Limits", new Lazy<Microsoft.UI.Xaml.FrameworkElement>(() => new AiLimitsSettingsView(_settingsProvider))),
+        new(LocalizedText.Get("DisplayName"), new Lazy<Microsoft.UI.Xaml.FrameworkElement>(() => new AiLimitsSettingsView(_settingsProvider))),
     ];
 
     public IconElement CreateIcon()

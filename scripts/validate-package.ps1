@@ -6,6 +6,55 @@ $package = Get-ChildItem -Path $artifactsDir -Filter "WindowSillAiLimits.*.nupkg
     Sort-Object LastWriteTime -Descending |
     Select-Object -First 1
 
+function Test-LocalizationResources {
+    $resourceRoot = Join-Path $repoRoot "src\WindowSillAiLimits\Strings"
+    $requiredCultures = @("en-US", "pt-BR")
+    $requiredKeys = @(
+        "DisplayName",
+        "Action.Refresh",
+        "Action.Settings",
+        "Popup.SourceNote",
+        "Pacing.ExpectedSoFar",
+        "Pacing.ForecastImpact",
+        "Settings.RefreshInterval.Label",
+        "Notification.UsageAboveExpected.BodyFormat"
+    )
+
+    $baselineKeys = $null
+    foreach ($culture in $requiredCultures) {
+        $resourcePath = Join-Path $resourceRoot "$culture\Resources.resw"
+        if (-not (Test-Path -LiteralPath $resourcePath)) {
+            throw "Missing localization resource file: $resourcePath"
+        }
+
+        [xml] $resourceXml = Get-Content -LiteralPath $resourcePath -Raw
+        $keys = @($resourceXml.root.data | ForEach-Object { $_.name } | Sort-Object -Unique)
+        foreach ($requiredKey in $requiredKeys) {
+            if (-not ($keys -contains $requiredKey)) {
+                throw "$culture localization resource is missing required key: $requiredKey"
+            }
+        }
+
+        if ($null -eq $baselineKeys) {
+            $baselineKeys = $keys
+            continue
+        }
+
+        $missingComparedToBaseline = Compare-Object -ReferenceObject $baselineKeys -DifferenceObject $keys |
+            Select-Object -First 1
+        if ($missingComparedToBaseline) {
+            throw "$culture localization resource keys do not match the en-US fallback set."
+        }
+    }
+
+    $legacyResourcePath = Join-Path $resourceRoot "en-US\Misc.resw"
+    if (Test-Path -LiteralPath $legacyResourcePath) {
+        throw "Legacy Misc.resw is still present; use Resources.resw for WindowSill localization."
+    }
+
+    Write-Host "[ok] i18n resources inspected for en-US fallback and pt-BR coverage."
+}
+
 if (-not $package) {
     throw "No WindowSillAiLimits .nupkg found in $artifactsDir. Run dotnet build -c Release first."
 }
@@ -157,6 +206,7 @@ function Test-ExtensionArchive {
 
 Test-ExtensionArchive -Path $package.FullName -Label "NuGet package"
 Test-ExtensionArchive -Path $wsextPath -Label "WindowSill extension"
+Test-LocalizationResources
 
 $sillSource = Join-Path $repoRoot "src\WindowSillAiLimits\AiLimitsSill.cs"
 $sillText = Get-Content -LiteralPath $sillSource -Raw

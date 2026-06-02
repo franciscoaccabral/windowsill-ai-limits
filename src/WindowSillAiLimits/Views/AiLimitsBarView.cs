@@ -114,7 +114,7 @@ public sealed class AiLimitsBarView : Grid
         TryApplySillButtonStyle(_mainButton);
         Children.Add(_mainButton);
 
-        ToolTipService.SetToolTip(this, "AI Limits");
+        ToolTipService.SetToolTip(this, LocalizedText.Get("DisplayName"));
         _viewModel.PropertyChanged += OnViewModelChanged;
         RefreshText();
         ApplyLayout(ActualWidth);

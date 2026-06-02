@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <data name="DisplayName" xml:space="preserve"><value>AI Limits</value></data>
+  <data name="Action.Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Popup.RefreshButton.ToolTipService.ToolTip" xml:space="preserve"><value>Refresh usage</value></data>
+  <data name="Action.Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Action.RefreshUsage" xml:space="preserve"><value>Refresh usage</value></data>
+  <data name="Action.RefreshCosts" xml:space="preserve"><value>Refresh API costs</value></data>
+  <data name="Action.ToggleCosts" xml:space="preserve"><value>Expand or collapse API costs</value></data>
+  <data name="Action.OpenSettings" xml:space="preserve"><value>Open AI Limits settings</value></data>
+  <data name="Popup.SourceNote" xml:space="preserve"><value>Local tool data</value></data>
+  <data name="Popup.NoProvidersDetected" xml:space="preserve"><value>No AI provider detected</value></data>
+  <data name="Popup.ApiCostsTitle" xml:space="preserve"><value>API costs</value></data>
+  <data name="Popup.ApiCostsSubtitleFormat" xml:space="preserve"><value>active 7d window - {0} - local estimate, not a bill</value></data>
+  <data name="Popup.NoCostProviders" xml:space="preserve"><value>No provider detected for cost estimates.</value></data>
+  <data name="Popup.ProviderCostsUnavailable" xml:space="preserve"><value>Costs unavailable for this provider.</value></data>
+  <data name="Popup.ProviderCostSubtitleFormat" xml:space="preserve"><value>cost by model used in the {0} window</value></data>
+  <data name="Popup.ModelHeader" xml:space="preserve"><value>Model</value></data>
+  <data name="Popup.TokensHeader" xml:space="preserve"><value>Tokens</value></data>
+  <data name="Popup.PriceHeader" xml:space="preserve"><value>Value/token</value></data>
+  <data name="Popup.CostHeader" xml:space="preserve"><value>Cost</value></data>
+  <data name="Popup.NoPrice" xml:space="preserve"><value>no price</value></data>
+  <data name="Popup.MoreModels" xml:space="preserve"><value>more models</value></data>
+  <data name="Popup.MoreModelsFormat" xml:space="preserve"><value>{0} more model(s)</value></data>
+  <data name="Popup.TotalPriced" xml:space="preserve"><value>Total priced</value></data>
+  <data name="Popup.NoPricedTokens" xml:space="preserve"><value>no priced tokens</value></data>
+  <data name="Popup.LocalEstimateNotBill" xml:space="preserve"><value>local estimate, not a bill</value></data>
+  <data name="Popup.CodexSourceNote" xml:space="preserve"><value>Using the local Codex app-server. No token is stored.</value></data>
+  <data name="Popup.ClaudeSourceNote" xml:space="preserve"><value>5h and 7d are read from local Claude Code OAuth state.</value></data>
+  <data name="Provider.CodexTitle" xml:space="preserve"><value>Codex</value></data>
+  <data name="Provider.ClaudeTitle" xml:space="preserve"><value>Claude Code</value></data>
+  <data name="Provider.CodexSubtitle" xml:space="preserve"><value>ChatGPT account</value></data>
+  <data name="Provider.ClaudeSubtitle" xml:space="preserve"><value>Subscription account</value></data>
+  <data name="Status.Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="Status.Warning" xml:space="preserve"><value>Warning</value></data>
+  <data name="Status.Unavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="Status.Stale" xml:space="preserve"><value>Stale</value></data>
+  <data name="Status.Error" xml:space="preserve"><value>Error</value></data>
+  <data name="Status.NotInstalled" xml:space="preserve"><value>Not installed</value></data>
+  <data name="Pacing.Used" xml:space="preserve"><value>Used</value></data>
+  <data name="Pacing.ExpectedSoFar" xml:space="preserve"><value>Expected so far</value></data>
+  <data name="Pacing.Difference" xml:space="preserve"><value>Difference</value></data>
+  <data name="Pacing.CurrentAveragePace" xml:space="preserve"><value>Current average pace</value></data>
+  <data name="Pacing.ProjectedExhaustion" xml:space="preserve"><value>Projected exhaustion</value></data>
+  <data name="Pacing.ForecastImpact" xml:space="preserve"><value>Impact</value></data>
+  <data name="Pacing.WeeklyWindowElapsed" xml:space="preserve"><value>7d window elapsed</value></data>
+  <data name="Pacing.NextWeeklyReset" xml:space="preserve"><value>Next 7d reset</value></data>
+  <data name="Pacing.FiveHourWindow" xml:space="preserve"><value>5h window</value></data>
+  <data name="Pacing.QueriedAt" xml:space="preserve"><value>Queried at</value></data>
+  <data name="Pacing.PerDaySuffix" xml:space="preserve"><value>per day</value></data>
+  <data name="Pacing.DaysElapsedFormat" xml:space="preserve"><value>{0} of 7 days</value></data>
+  <data name="Pacing.ResetUnavailable" xml:space="preserve"><value>reset unavailable</value></data>
+  <data name="Pacing.ResetTimeFormat" xml:space="preserve"><value>reset {0}</value></data>
+  <data name="Pacing.UsedResetFormat" xml:space="preserve"><value>{0} used; {1}</value></data>
+  <data name="Pacing.DoesNotExhaustBeforeReset" xml:space="preserve"><value>does not exhaust before reset</value></data>
+  <data name="Pacing.NoForecast" xml:space="preserve"><value>no forecast</value></data>
+  <data name="Pacing.ResetComesFirst" xml:space="preserve"><value>reset comes first</value></data>
+  <data name="Pacing.InsufficientPace" xml:space="preserve"><value>insufficient pace</value></data>
+  <data name="Pacing.BeforeResetFormat" xml:space="preserve"><value>{0} before reset</value></data>
+  <data name="Pacing.ResetTodayFormat" xml:space="preserve"><value>reset today {0}</value></data>
+  <data name="Pacing.ResetDayFormat" xml:space="preserve"><value>reset {0}</value></data>
+  <data name="Pacing.HoursMinutesFormat" xml:space="preserve"><value>{0}h {1}m</value></data>
+  <data name="Pacing.MinutesFormat" xml:space="preserve"><value>{0}m</value></data>
+  <data name="Preview.ExpectedFormat" xml:space="preserve"><value>{0} {1}</value></data>
+  <data name="Preview.ExpectedRatioFormat" xml:space="preserve"><value>{0}% of {1}% ({2} of expected)</value></data>
+  <data name="Preview.Above" xml:space="preserve"><value>above</value></data>
+  <data name="Preview.Below" xml:space="preserve"><value>below</value></data>
+  <data name="Preview.DifferenceFormat" xml:space="preserve"><value>{0} p.p. {1}</value></data>
+  <data name="ViewModel.NoUpdate" xml:space="preserve"><value>no update</value></data>
+  <data name="ViewModel.UpdatedFormat" xml:space="preserve"><value>updated {0}</value></data>
+  <data name="ViewModel.CostsNoUpdate" xml:space="preserve"><value>costs not updated</value></data>
+  <data name="ViewModel.CostsUpdatedFormat" xml:space="preserve"><value>costs updated {0}</value></data>
+  <data name="ViewModel.TokensSuffix" xml:space="preserve"><value>tokens</value></data>
+  <data name="Settings.RefreshInterval.Label" xml:space="preserve"><value>Refresh interval</value></data>
+  <data name="Settings.CostRefreshInterval.Label" xml:space="preserve"><value>Cost refresh interval</value></data>
+  <data name="Settings.CodexPath.Label" xml:space="preserve"><value>Codex command path</value></data>
+  <data name="Settings.ClaudePath.Label" xml:space="preserve"><value>Claude command path</value></data>
+  <data name="Settings.ShowProviderNames" xml:space="preserve"><value>Show provider names in the bar</value></data>
+  <data name="Settings.ShowExpectedInBar" xml:space="preserve"><value>Show expected usage in the bar</value></data>
+  <data name="Settings.ShowOverExpectedAlerts" xml:space="preserve"><value>Notify when actual usage passes expected usage</value></data>
+  <data name="Settings.ShowPreviewFlyout" xml:space="preserve"><value>Show preview on hover</value></data>
+  <data name="Settings.UseMockData" xml:space="preserve"><value>Use mock data</value></data>
+  <data name="Settings.OneHour" xml:space="preserve"><value>1 hour</value></data>
+  <data name="Settings.HoursFormat" xml:space="preserve"><value>{0} hours</value></data>
+  <data name="Settings.MinutesFormat" xml:space="preserve"><value>{0} minutes</value></data>
+  <data name="Notification.UsageAboveExpected.BodyFormat" xml:space="preserve"><value>{0} {1}: actual {2}% passed expected {3}%.</value></data>
+  <data name="Sanitizer.UsageQueryFailed" xml:space="preserve"><value>Usage query failed.</value></data>
+</root>
