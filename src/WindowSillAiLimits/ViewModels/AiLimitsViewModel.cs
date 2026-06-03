@@ -142,7 +142,7 @@ public sealed class AiLimitsViewModel : INotifyPropertyChanged, IDisposable
 
             return lastUpdated == default
                 ? LocalizedText.Get("ViewModel.CostsNoUpdate")
-                : LocalizedText.Format("ViewModel.CostsUpdatedFormat", lastUpdated.ToLocalTime().ToString("HH:mm", CultureInfo.CurrentCulture));
+                : LocalizedText.Format("ViewModel.CostsUpdatedFormat", lastUpdated.ToString("HH:mm", CultureInfo.CurrentCulture));
         }
     }
 

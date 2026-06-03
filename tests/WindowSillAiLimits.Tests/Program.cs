@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
@@ -14,6 +15,11 @@ using WindowSillAiLimits.Settings;
 using WindowSillAiLimits.Services;
 using WindowSillAiLimits.ViewModels;
 using WindowSillAiLimits.Views;
+
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("pt-BR");
+CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
+CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("pt-BR");
 
 if (args.Contains("--live-codex", StringComparer.Ordinal))
 {
