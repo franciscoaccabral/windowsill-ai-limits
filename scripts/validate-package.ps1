@@ -147,6 +147,49 @@ function Test-ExtensionArchive {
             $reader.Dispose()
         }
 
+        [xml] $nuspecXml = $nuspecText
+        $namespaceManager = [Xml.XmlNamespaceManager]::new($nuspecXml.NameTable)
+        $namespaceManager.AddNamespace("n", "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd")
+        $metadata = $nuspecXml.SelectSingleNode("/n:package/n:metadata", $namespaceManager)
+        if (-not $metadata) {
+            throw "$Label .nuspec is missing metadata."
+        }
+
+        function Assert-NuspecText {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string] $Element,
+                [Parameter(Mandatory = $true)]
+                [string] $Expected
+            )
+
+            $node = $metadata.SelectSingleNode("n:$Element", $namespaceManager)
+            if (-not $node -or $node.InnerText -ne $Expected) {
+                throw "$Label .nuspec is missing required marketplace metadata: $Element=$Expected"
+            }
+        }
+
+        Assert-NuspecText -Element "id" -Expected "WindowSillAiLimits"
+        Assert-NuspecText -Element "title" -Expected "WindowSill AI Limits"
+        Assert-NuspecText -Element "authors" -Expected "Francisco Cabral"
+        Assert-NuspecText -Element "projectUrl" -Expected "https://github.com/franciscoaccabral/windowsill-ai-limits"
+        Assert-NuspecText -Element "readme" -Expected "README.md"
+        Assert-NuspecText -Element "icon" -Expected "content/screenshots/compact-bar.png"
+
+        $license = $metadata.SelectSingleNode("n:license", $namespaceManager)
+        if (-not $license -or
+            $license.InnerText -ne "LICENSE.md" -or
+            $license.GetAttribute("type") -ne "file") {
+            throw "$Label .nuspec is missing required marketplace metadata: license file LICENSE.md"
+        }
+
+        $repository = $metadata.SelectSingleNode("n:repository", $namespaceManager)
+        if (-not $repository -or
+            $repository.GetAttribute("type") -ne "git" -or
+            $repository.GetAttribute("url") -ne "https://github.com/franciscoaccabral/windowsill-ai-limits") {
+            throw "$Label .nuspec is missing required marketplace metadata: git repository URL"
+        }
+
         $workspacePathPatterns = @(
             [Regex]::Escape($repoRoot),
             [Regex]::Escape($repoRoot.Replace("\", "/"))

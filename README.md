@@ -48,7 +48,33 @@ For enterprise or managed deployments, use the standalone installer described in
 
 ## Install AI Limits
 
-1. Download or build `WindowSillAiLimits.<version>.wsext`.
+Install the latest GitHub release with PowerShell:
+
+```pwsh
+irm https://raw.githubusercontent.com/franciscoaccabral/windowsill-ai-limits/main/scripts/install.ps1 | iex
+```
+
+Install a specific version:
+
+```pwsh
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/franciscoaccabral/windowsill-ai-limits/main/scripts/install.ps1))) -Version v0.1.0
+```
+
+If you prefer to inspect the installer before running it:
+
+```pwsh
+irm https://raw.githubusercontent.com/franciscoaccabral/windowsill-ai-limits/main/scripts/install.ps1 -OutFile .\install-ai-limits.ps1
+notepad .\install-ai-limits.ps1
+.\install-ai-limits.ps1
+```
+
+The installer downloads the `.wsext` from GitHub Releases, verifies its SHA256 checksum,
+and opens it with the official WindowSill/Windows `.wsext` association. It does not write
+directly into WindowSill internal plugin directories.
+
+Manual install is also supported:
+
+1. Download `WindowSillAiLimits.<version>.wsext` from the latest GitHub Release.
 2. Double-click the `.wsext` file to install it in WindowSill.
 3. Restart or reload WindowSill. The `AI Limits` sill is activated by default.
 
@@ -91,6 +117,44 @@ dotnet run --project .\tests\WindowSillAiLimits.Tests\WindowSillAiLimits.Tests.c
 ```
 
 Release builds generate a NuGet package and a synchronized `.wsext` file under `artifacts/`.
+
+## Release
+
+GitHub Releases are created automatically from annotated tags named `vX.Y.Z` or
+`vX.Y.Z-prerelease`. The tag version must match `<Version>` in
+`src/WindowSillAiLimits/WindowSillAiLimits.csproj`.
+
+Before publishing, run the local gates:
+
+```pwsh
+dotnet build .\WindowSillAiLimits.slnx -c Release
+dotnet test .\WindowSillAiLimits.slnx -c Release
+dotnet run --project .\tests\WindowSillAiLimits.Tests\WindowSillAiLimits.Tests.csproj -c Release
+.\scripts\validate-package.ps1
+```
+
+Then create and push the tag:
+
+```pwsh
+git tag -a v0.1.0 -m "Release v0.1.0"
+git push origin v0.1.0
+```
+
+The release workflow builds on `windows-latest`, validates the package, checks the tag/version
+match, publishes `.wsext`, `.nupkg`, and `.sha256` assets, and generates artifact provenance.
+
+## WindowSill Marketplace Readiness
+
+The GitHub Release `.wsext` is the initial distribution path. Future WindowSill marketplace
+publication uses the same validated NuGet package:
+
+1. Publish `WindowSillAiLimits.<version>.nupkg` to nuget.org.
+2. Add `WindowSillAiLimits` to the official `WindowSill-app/WindowSill-Extensions-Pkgs`
+   manifest under the `AI` category.
+3. After approval, WindowSill detects new NuGet versions automatically.
+
+Package metadata, license, readme, changelog, icon, and screenshots are included in the `.nupkg`
+so the package remains compatible with that future marketplace flow.
 
 ## Architecture
 
