@@ -1,6 +1,6 @@
 param(
-    [ValidatePattern('^v\d+\.\d+\.\d+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?$')]
-    [string] $Version,
+    [Alias("Version")]
+    [string] $ReleaseVersion,
     [switch] $NoOpen
 )
 
@@ -17,12 +17,17 @@ $headers = @{
     "User-Agent" = "WindowSillAiLimitsInstaller"
 }
 
+if (-not [string]::IsNullOrWhiteSpace($ReleaseVersion) -and
+    $ReleaseVersion -notmatch '^v\d+\.\d+\.\d+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?$') {
+    throw "Release version must use vX.Y.Z or vX.Y.Z-prerelease format. Got: $ReleaseVersion"
+}
+
 function Get-GitHubRelease {
-    if ([string]::IsNullOrWhiteSpace($Version)) {
+    if ([string]::IsNullOrWhiteSpace($ReleaseVersion)) {
         return Invoke-RestMethod -Uri "$apiRoot/releases/latest" -Headers $headers
     }
 
-    return Invoke-RestMethod -Uri "$apiRoot/releases/tags/$Version" -Headers $headers
+    return Invoke-RestMethod -Uri "$apiRoot/releases/tags/$ReleaseVersion" -Headers $headers
 }
 
 function Assert-ExpectedDownloadUrl {
@@ -78,18 +83,18 @@ try {
     $release = Get-GitHubRelease
 }
 catch {
-    if ([string]::IsNullOrWhiteSpace($Version)) {
+    if ([string]::IsNullOrWhiteSpace($ReleaseVersion)) {
         throw "Could not find a latest GitHub release for $owner/$repo. Has a vX.Y.Z tag been published?"
     }
 
-    throw "Could not find GitHub release $Version for $owner/$repo."
+    throw "Could not find GitHub release $ReleaseVersion for $owner/$repo."
 }
 
 if ($release.draft) {
     throw "Release $($release.tag_name) is still a draft."
 }
 
-if ($release.prerelease -and [string]::IsNullOrWhiteSpace($Version)) {
+if ($release.prerelease -and [string]::IsNullOrWhiteSpace($ReleaseVersion)) {
     throw "Latest release $($release.tag_name) is marked as prerelease. Re-run with -Version $($release.tag_name) if you want it."
 }
 
