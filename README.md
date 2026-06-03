@@ -69,8 +69,10 @@ notepad .\install-ai-limits.ps1
 ```
 
 The installer downloads the `.wsext` from GitHub Releases, verifies its SHA256 checksum,
-and opens it with the official WindowSill/Windows `.wsext` association. It does not write
-directly into WindowSill internal plugin directories.
+closes WindowSill, removes any existing `WindowSillAiLimits` local plugin folder, extracts
+the verified package into WindowSill's `LocalState\Plugins`, and starts WindowSill again.
+If WindowSill package data is not available yet, launch WindowSill once from the Start menu
+and rerun the installer.
 
 Manual install is also supported:
 

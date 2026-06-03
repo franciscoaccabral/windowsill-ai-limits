@@ -1,7 +1,8 @@
 param(
     [Alias("Version")]
     [string] $ReleaseVersion,
-    [switch] $NoOpen
+    [switch] $NoOpen,
+    [switch] $NoRestart
 )
 
 $ErrorActionPreference = "Stop"
@@ -79,6 +80,143 @@ function Get-ExpectedHash {
     return $Matches.hash.ToLowerInvariant()
 }
 
+function Test-WsextAssociation {
+    $association = @(
+        Get-ItemProperty -Path 'Registry::HKEY_CLASSES_ROOT\.wsext' -ErrorAction SilentlyContinue
+        Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Classes\.wsext' -ErrorAction SilentlyContinue
+    ) | Where-Object { $_ }
+
+    return $association.Count -gt 0
+}
+
+function Get-WindowSillPackageDirectory {
+    $localPackages = Join-Path $env:LOCALAPPDATA "Packages"
+    if (-not (Test-Path -LiteralPath $localPackages)) {
+        return $null
+    }
+
+    Get-ChildItem -LiteralPath $localPackages -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match 'WindowSill|64360VelerSoftware' } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+}
+
+function Stop-WindowSill {
+    $windowSillProcess = @(Get-Process -Name "WindowSill" -ErrorAction SilentlyContinue)
+    if ($windowSillProcess.Count -eq 0) {
+        Write-Host "[ok] WindowSill is not running."
+        return
+    }
+
+    Write-Host "[warn] Closing WindowSill before reinstalling the extension..."
+    foreach ($process in $windowSillProcess) {
+        if ($process.MainWindowHandle -ne 0) {
+            [void] $process.CloseMainWindow()
+        }
+    }
+
+    try {
+        Wait-Process -Id @($windowSillProcess | ForEach-Object { $_.Id }) -Timeout 10 -ErrorAction Stop
+        Write-Host "[ok] WindowSill closed."
+        return
+    }
+    catch {
+        Write-Host "[warn] WindowSill did not close gracefully; stopping it so plugin files can be replaced."
+        Stop-Process -Id @($windowSillProcess | ForEach-Object { $_.Id }) -Force -ErrorAction Stop
+        Wait-Process -Id @($windowSillProcess | ForEach-Object { $_.Id }) -Timeout 10 -ErrorAction SilentlyContinue
+        Write-Host "[ok] WindowSill stopped."
+    }
+}
+
+function Start-WindowSill {
+    if ($NoRestart) {
+        Write-Host "Skipping WindowSill restart because -NoRestart was specified."
+        return
+    }
+
+    $command = Get-Command "windowsill.exe" -ErrorAction SilentlyContinue
+    if ($command) {
+        Start-Process -FilePath $command.Source
+        Write-Host "[ok] WindowSill started: $($command.Source)"
+        return
+    }
+
+    $startApp = Get-StartApps | Where-Object { $_.Name -eq "WindowSill" } | Select-Object -First 1
+    if ($startApp) {
+        Start-Process -FilePath "shell:AppsFolder\$($startApp.AppID)"
+        Write-Host "[ok] WindowSill started: $($startApp.AppID)"
+        return
+    }
+
+    Write-Host "[warn] Could not start WindowSill automatically. Start it from the Start menu to load AI Limits."
+}
+
+function Remove-ExistingPluginDirectory {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $PluginDirectory
+    )
+
+    if (-not (Test-Path -LiteralPath $PluginDirectory)) {
+        Write-Host "[ok] AI Limits is not currently installed under WindowSill local plugins."
+        return
+    }
+
+    Write-Host "[ok] Existing AI Limits installation found. Removing: $PluginDirectory"
+    for ($attempt = 1; $attempt -le 6; $attempt++) {
+        try {
+            Remove-Item -LiteralPath $PluginDirectory -Recurse -Force -ErrorAction Stop
+            return
+        }
+        catch {
+            if ($attempt -eq 6) {
+                throw "Could not remove the existing AI Limits plugin folder after closing WindowSill. Last error: $($_.Exception.Message)"
+            }
+
+            Write-Host "[warn] Plugin files are still being released; retrying removal ($attempt/5)..."
+            Start-Sleep -Seconds 2
+        }
+    }
+}
+
+function Install-LocalWindowSillPlugin {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $PackagePath
+    )
+
+    $packageDirectory = Get-WindowSillPackageDirectory
+    if (-not $packageDirectory) {
+        throw "WindowSill package data was not found under $env:LOCALAPPDATA\Packages. Install or launch WindowSill once, then open this verified file manually: $PackagePath"
+    }
+
+    $pluginsRoot = Join-Path $packageDirectory.FullName "LocalState\Plugins"
+    $pluginDirectory = Join-Path $pluginsRoot $packageId
+
+    $resolvedParent = [IO.Path]::GetFullPath($pluginsRoot)
+    $resolvedTarget = [IO.Path]::GetFullPath($pluginDirectory)
+    if (-not $resolvedTarget.StartsWith($resolvedParent, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to install outside the WindowSill plugin directory: $resolvedTarget"
+    }
+
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    New-Item -ItemType Directory -Path $pluginsRoot -Force | Out-Null
+
+    Remove-ExistingPluginDirectory -PluginDirectory $pluginDirectory
+
+    New-Item -ItemType Directory -Path $pluginDirectory -Force | Out-Null
+    [IO.Compression.ZipFile]::ExtractToDirectory($PackagePath, $pluginDirectory)
+
+    $installedDll = Get-ChildItem -LiteralPath $pluginDirectory -Recurse -Filter "$packageId.dll" -File -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if (-not $installedDll) {
+        throw "The package was extracted, but $packageId.dll was not found under $pluginDirectory."
+    }
+
+    Write-Host "[ok] Installed directly into WindowSill local plugins: $pluginDirectory"
+    Write-Host "Start or restart WindowSill to load AI Limits."
+}
+
 try {
     $release = Get-GitHubRelease
 }
@@ -133,13 +271,17 @@ if ($NoOpen) {
     return
 }
 
-$association = @(
-    Get-ItemProperty -Path 'Registry::HKEY_CLASSES_ROOT\.wsext' -ErrorAction SilentlyContinue
-    Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Classes\.wsext' -ErrorAction SilentlyContinue
-) | Where-Object { $_ }
+$windowSillPackageDirectory = Get-WindowSillPackageDirectory
+if ($windowSillPackageDirectory) {
+    Stop-WindowSill
+    Write-Host "[ok] WindowSill package data found: $($windowSillPackageDirectory.FullName)"
+    Install-LocalWindowSillPlugin -PackagePath $wsextPath
+    Start-WindowSill
+    return
+}
 
-if ($association.Count -eq 0) {
-    throw ".wsext file association was not found. Install or launch WindowSill once, then open this verified file manually: $wsextPath"
+if (-not (Test-WsextAssociation)) {
+    throw ".wsext file association and WindowSill package data were not found. Install or launch WindowSill once, then run this installer again. Verified file: $wsextPath"
 }
 
 Write-Host "Opening $wsextName with WindowSill..."
