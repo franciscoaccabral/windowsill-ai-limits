@@ -68,6 +68,8 @@ if (args.Contains("--live-claude", StringComparer.Ordinal))
 
 var tests = new (string Name, Func<Task> Run)[]
 {
+    ("parses available Codex reset credits with grant and expiry dates", Tests.ParsesAvailableCodexResetCreditsWithGrantAndExpiryDates),
+    ("expanded popup appends reset credits only to Codex", Tests.ExpandedPopupAppendsResetCreditsOnlyToCodex),
     ("formats collapsed values and unavailable placeholders", Tests.FormatsCollapsedValuesAndUnavailablePlaceholders),
     ("formats collapsed values with expected percentages", Tests.FormatsCollapsedValuesWithExpectedPercentages),
     ("infers expected percentages from reset timestamps", Tests.InfersExpectedPercentagesFromResetTimestamps),
@@ -208,6 +210,31 @@ static string FormatReset(DateTimeOffset? value)
 
 internal static class Tests
 {
+    public static Task ParsesAvailableCodexResetCreditsWithGrantAndExpiryDates()
+    {
+        var credits = CodexResetCreditsParser.Parse("""
+            {"available_count":1,"credits":[
+              {"status":"available","title":"One free rate limit reset","granted_at":"2026-06-23T13:15:00Z","expires_at":"2026-07-06T13:15:00Z"},
+              {"status":"redeemed","granted_at":"2026-06-20T10:00:00Z","expires_at":"2026-07-03T10:00:00Z"}
+            ]}
+            """);
+
+        AssertEqual(1, credits.Count);
+        AssertEqual(new DateTimeOffset(2026, 6, 23, 13, 15, 0, TimeSpan.Zero), credits[0].GrantedAt);
+        AssertEqual(new DateTimeOffset(2026, 7, 6, 13, 15, 0, TimeSpan.Zero), credits[0].ExpiresAt);
+        return Task.CompletedTask;
+    }
+
+    public static Task ExpandedPopupAppendsResetCreditsOnlyToCodex()
+    {
+        var popupPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "WindowSillAiLimits", "Views", "AiLimitsPopupContent.cs"));
+        var source = File.ReadAllText(popupPath);
+
+        AssertTrue(source.Contains("provider.Provider == UsageProvider.Codex && provider.ResetCredits is { Count: > 0 }", StringComparison.Ordinal), "Reset credits must be restricted to the expanded Codex provider card.");
+        AssertTrue(source.IndexOf("stack.Children.Add(BuildResetCreditsBlock", StringComparison.Ordinal) > source.IndexOf("stack.Children.Add(BuildSourceNote(provider))", StringComparison.Ordinal), "Reset credits must be appended at the end of the Codex details.");
+        return Task.CompletedTask;
+    }
+
     public static Task FormatsCollapsedValuesAndUnavailablePlaceholders()
     {
         var now = new DateTimeOffset(2026, 5, 24, 18, 0, 0, TimeSpan.FromHours(-3));

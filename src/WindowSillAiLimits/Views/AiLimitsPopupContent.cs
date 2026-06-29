@@ -239,6 +239,11 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
 
         stack.Children.Add(BuildSourceNote(provider));
 
+        if (provider.Provider == UsageProvider.Codex && provider.ResetCredits is { Count: > 0 })
+        {
+            stack.Children.Add(BuildResetCreditsBlock(provider.ResetCredits));
+        }
+
         section.Child = stack;
         return section;
     }
@@ -829,6 +834,36 @@ public sealed partial class AiLimitsPopupContent : SillPopupContent
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(6),
             Child = CompactWrappedText(text),
+        };
+    }
+
+    private static Border BuildResetCreditsBlock(IReadOnlyList<CodexResetCredit> credits)
+    {
+        var stack = new StackPanel { Spacing = 4 };
+        var title = new TextBlock
+        {
+            Text = "Resets extras",
+            Foreground = AiLimitsPalette.Text,
+            FontWeight = FontWeights.SemiBold,
+        };
+        ApplyCompactText(title, HeaderFontSize);
+        stack.Children.Add(title);
+
+        for (var index = 0; index < credits.Count; index++)
+        {
+            var credit = credits[index];
+            stack.Children.Add(Detail($"Reset {index + 1} concedido", credit.GrantedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.CurrentCulture)));
+            stack.Children.Add(Detail("Expira", credit.ExpiresAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.CurrentCulture)));
+        }
+
+        return new Border
+        {
+            Padding = new Thickness(8, 7, 8, 7),
+            Background = AiLimitsPalette.Surface,
+            BorderBrush = AiLimitsPalette.Border,
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Child = stack,
         };
     }
 

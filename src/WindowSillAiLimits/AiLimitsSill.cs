@@ -230,7 +230,8 @@ public sealed class AiLimitsSill : ISillActivatedByDefault, ISillSingleView, IDi
         [
             new CodexUsageProbe(
                 new CodexAppServerClient(settingsProvider.GetSetting(AiLimitsSettings.CodexCommandPath), TimeSpan.FromSeconds(10)),
-                clock),
+                clock,
+                new CodexResetCreditsReader(TimeSpan.FromSeconds(10))),
             new ClaudeUsageProbe(new ClaudeOAuthUsageClient(TimeSpan.FromSeconds(10)), clock),
         ];
     }

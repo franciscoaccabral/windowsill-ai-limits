@@ -2,7 +2,10 @@ using WindowSillAiLimits.Models;
 
 namespace WindowSillAiLimits.Services.Codex;
 
-public sealed class CodexUsageProbe(ICodexAppServerClient client, Func<DateTimeOffset>? clock = null) : IUsageProbe, IDisposable
+public sealed class CodexUsageProbe(
+    ICodexAppServerClient client,
+    Func<DateTimeOffset>? clock = null,
+    ICodexResetCreditsReader? resetCreditsReader = null) : IUsageProbe, IDisposable
 {
     private readonly Func<DateTimeOffset> _clock = clock ?? (() => DateTimeOffset.Now);
 
@@ -21,7 +24,25 @@ public sealed class CodexUsageProbe(ICodexAppServerClient client, Func<DateTimeO
             var accountJson = await client.SendRequestAsync("account/read", EmptyParams(), cancellationToken);
             var rateLimitsJson = await client.SendRequestAsync("account/rateLimits/read", EmptyParams(), cancellationToken);
 
-            return CodexRateLimitParser.Parse(accountJson, rateLimitsJson, now);
+            var usage = CodexRateLimitParser.Parse(accountJson, rateLimitsJson, now);
+            if (resetCreditsReader is null)
+            {
+                return usage;
+            }
+
+            try
+            {
+                var credits = await resetCreditsReader.ReadAsync(cancellationToken);
+                return usage with { ResetCredits = credits };
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return usage;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                return usage;
+            }
         }
         catch (CodexAppServerException ex) when (ex.CommandMissing)
         {

@@ -8,4 +8,5 @@ public sealed record ProviderUsage(
     IReadOnlyList<UsageWindow> Windows,
     DateTimeOffset? LastUpdated,
     string? Message,
-    ApiCostEstimate? ApiCostEstimate = null);
+    ApiCostEstimate? ApiCostEstimate = null,
+    IReadOnlyList<CodexResetCredit>? ResetCredits = null);
