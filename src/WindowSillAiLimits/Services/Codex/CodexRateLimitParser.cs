@@ -62,8 +62,8 @@ public static class CodexRateLimitParser
         var rateLimits = GetPropertyOrDefault(result, "rateLimits");
         var windows = new List<UsageWindow>();
 
-        AddNamedWindow(windows, rateLimits, "primary", "5h", "5h", now);
-        AddNamedWindow(windows, rateLimits, "secondary", "7d", "7d", now);
+        AddNamedWindow(windows, rateLimits, "primary", "5h", now);
+        AddNamedWindow(windows, rateLimits, "secondary", "7d", now);
 
         if (windows.Count > 0)
         {
@@ -85,8 +85,8 @@ public static class CodexRateLimitParser
 
                 if (primary.ValueKind == JsonValueKind.Object || secondary.ValueKind == JsonValueKind.Object)
                 {
-                    AddNamedWindow(windows, limit.Value, "primary", "5h", "5h", now);
-                    AddNamedWindow(windows, limit.Value, "secondary", "7d", "7d", now);
+                    AddNamedWindow(windows, limit.Value, "primary", "5h", now);
+                    AddNamedWindow(windows, limit.Value, "secondary", "7d", now);
                 }
                 else
                 {
@@ -102,12 +102,13 @@ public static class CodexRateLimitParser
             .ToArray();
     }
 
-    private static void AddNamedWindow(List<UsageWindow> windows, JsonElement rateLimits, string sourceName, string id, string label, DateTimeOffset now)
+    private static void AddNamedWindow(List<UsageWindow> windows, JsonElement rateLimits, string sourceName, string fallbackId, DateTimeOffset now)
     {
         var source = GetPropertyOrDefault(rateLimits, sourceName);
         if (source.ValueKind == JsonValueKind.Object)
         {
-            windows.Add(CreateWindow(source, id, label, now));
+            var normalizedId = NormalizeWindowId(fallbackId, source);
+            windows.Add(CreateWindow(source, normalizedId, normalizedId, now));
         }
     }
 
@@ -135,7 +136,7 @@ public static class CodexRateLimitParser
         if (name.Contains("7d", StringComparison.Ordinal) ||
             name.Contains("week", StringComparison.Ordinal) ||
             name.Contains("weekly", StringComparison.Ordinal) ||
-            (TryGetDouble(source, "durationMinutes", out var minutes) && minutes >= 10080))
+            (TryGetDurationMinutes(source, out var minutes) && minutes >= 10080))
         {
             return "7d";
         }

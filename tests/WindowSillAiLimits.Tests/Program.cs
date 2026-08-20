@@ -118,6 +118,7 @@ var tests = new (string Name, Func<Task> Run)[]
     ("resolves Windows command shims without shell execution", Tests.ResolvesWindowsCommandShimsWithoutShellExecution),
     ("parses Codex primary and secondary rate limits", Tests.ParsesCodexPrimaryAndSecondaryRateLimits),
     ("parses Codex schema integer reset and duration fields", Tests.ParsesCodexSchemaIntegerResetAndDurationFields),
+    ("parses a weekly-only Codex rate limit by duration", Tests.ParsesWeeklyOnlyCodexRateLimitByDuration),
     ("parses Codex rate limits by limit id", Tests.ParsesCodexRateLimitsByLimitId),
     ("maps Codex JSON-RPC errors to unavailable provider", Tests.MapsCodexJsonRpcErrorsToUnavailableProvider),
     ("maps Codex account JSON-RPC errors to unavailable provider", Tests.MapsCodexAccountJsonRpcErrorsToUnavailableProvider),
@@ -1340,6 +1341,25 @@ internal static class Tests
         AssertEqual(TimeSpan.FromMinutes(300), usage.Windows[0].Duration);
         AssertEqual(reset.ToUnixTimeSeconds(), usage.Windows[0].ResetsAt?.ToUnixTimeSeconds());
         AssertEqual(TimeSpan.FromMinutes(10080), usage.Windows[1].Duration);
+
+        return Task.CompletedTask;
+    }
+
+    public static Task ParsesWeeklyOnlyCodexRateLimitByDuration()
+    {
+        var now = new DateTimeOffset(2026, 8, 20, 11, 36, 0, TimeSpan.FromHours(-3));
+        var accountJson = """{"result":{"planType":"prolite"}}""";
+        var rateLimitsJson = """
+            {"result":{"rateLimits":{"primary":{"usedPercent":1,"resetsAt":"2026-08-27T11:17:00-03:00","windowDurationMins":10080}}}}
+            """;
+
+        var usage = CodexRateLimitParser.Parse(accountJson, rateLimitsJson, now);
+
+        AssertEqual(1, usage.Windows.Count);
+        AssertEqual("7d", usage.Windows[0].Id);
+        AssertEqual("7d", usage.Windows[0].Label);
+        AssertEqual(TimeSpan.FromDays(7), usage.Windows[0].Duration);
+        AssertEqual(1, usage.Windows[0].UsedPercent);
 
         return Task.CompletedTask;
     }
